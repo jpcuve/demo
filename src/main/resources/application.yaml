@@ -1,0 +1,14 @@
+spring:
+  datasource:
+    url: jdbc:h2:mem:demo;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+  jpa:
+    database-platform: org.hibernate.dialect.H2Dialect
+    hibernate:
+      ddl-auto: create
+    show-sql: true
+  h2:
+    console:
+      enabled: true
+logging:
+  level:
+    com.messio.messio: debug
