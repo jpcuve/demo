@@ -3,7 +3,7 @@ package com.messio.demo
 import java.math.BigDecimal
 import javax.persistence.AttributeConverter
 
-class Position(vararg amounts: Pair<String, BigDecimal>) : HashMap<String, BigDecimal>() {
+class Position constructor(vararg amounts: Pair<String, BigDecimal>) : HashMap<String, BigDecimal>() {
     init {
         amounts.forEach { put(it.first, it.second) }
     }
@@ -12,13 +12,16 @@ class Position(vararg amounts: Pair<String, BigDecimal>) : HashMap<String, BigDe
         putAll(p)
     }
 
-    fun normalize(): Position = Position(filter { it.value != BigDecimal.ZERO })
+    fun add(that: Position): Position = Position()
+
+    fun negate(): Position = Position(mapValues { it.value.negate() })
+
+    fun normalize(): Position = Position(filter { it.value.signum() != 0 })
 
     companion object {
-        val ZERO: Position = Position("USD" to BigDecimal(1)).normalize()
+        val ZERO: Position = Position("USD" to BigDecimal(1)).negate()
 
         fun parse(s: String?): Position? {
-            val t = mapOf<String, BigDecimal>()
             if (s == null) return null
             return ZERO;
         }
