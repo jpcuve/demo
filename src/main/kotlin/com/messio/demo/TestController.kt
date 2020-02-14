@@ -14,7 +14,7 @@ class TestController @Autowired constructor(
     fun apiAllBanks() = bankRepository.findAll().asSequence().toList()
 
     @GetMapping("/all-currency-groups")
-    fun apiAllCurrencyGroups() = currencyGroupRepository.findAll().asSequence().toList()
+    fun apiAllCurrencyGroups() = currencyGroupRepository.findAllByOrderByPriority().asSequence().toList()
 
     @GetMapping("/all-currencies")
     fun apiAllCurrencies() = currencyRepository.findAll().asSequence().toList()

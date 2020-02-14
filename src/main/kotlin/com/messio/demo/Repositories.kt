@@ -6,5 +6,7 @@ interface BankRepository: CrudRepository<Bank, Long> {
     fun findByName(name: String): Bank?
 }
 
-interface CurrencyGroupRepository: CrudRepository<CurrencyGroup, Long>
+interface CurrencyGroupRepository: CrudRepository<CurrencyGroup, Long>{
+    fun findAllByOrderByPriority(): Iterable<CurrencyGroup>
+}
 interface CurrencyRepository: CrudRepository<Currency, Long>

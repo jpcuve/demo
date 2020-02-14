@@ -11,4 +11,4 @@ spring:
       enabled: true
 logging:
   level:
-    com.messio.messio: debug
+    com.messio.demo: debug

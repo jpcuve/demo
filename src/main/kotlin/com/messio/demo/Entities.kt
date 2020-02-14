@@ -28,7 +28,8 @@ class Bank(
 @Table(name = "currency_groups", uniqueConstraints = [UniqueConstraint(columnNames = ["name"])])
 class CurrencyGroup(
         @Id @Column(name = "id") var id: Long,
-        @Basic @Column(name = "name", nullable = false, unique = true) var name: String
+        @Basic @Column(name = "name", nullable = false, unique = true) var name: String,
+        @Basic @Column(name = "priority", nullable = false) var priority: Int
 )
 
 @Entity
