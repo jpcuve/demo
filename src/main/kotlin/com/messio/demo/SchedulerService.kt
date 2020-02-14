@@ -11,11 +11,11 @@ class SchedulerService {
         logger.debug("Scheduler service initializing")
     }
 
-    fun enter(event: BankEvent) {
+    fun enter(event: BaseEvent) {
 
     }
 
-    fun enterAbs(event: BankEvent) {
+    fun enterAbs(event: BaseEvent) {
 
     }
 }

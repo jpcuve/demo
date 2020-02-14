@@ -47,3 +47,12 @@ class Currency(
         @Basic @Column(name = "funding_completion_target", nullable = false) var fundingCompletionTarget: LocalTime,
         @Basic @Column(name = "close", nullable = false) var close: LocalTime
 )
+
+@Entity
+@Table(name = "instructions")
+@JsonIgnoreProperties("bank")
+class Instruction(
+        @Id @Column(name = "id") var id: Long,
+        @ManyToOne @JoinColumn(name = "bank_id", nullable = false) var bank: Bank,
+        @Basic @Column(name = "bank_id", insertable = false, updatable = false) var bankId: Long
+)
