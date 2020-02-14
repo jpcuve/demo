@@ -6,11 +6,17 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 class TestController @Autowired constructor(
-        val bankRepository: BankRepository
+        val bankRepository: BankRepository,
+        val currencyGroupRepository: CurrencyGroupRepository,
+        val currencyRepository: CurrencyRepository
 ) {
     @GetMapping("/all-banks")
-    fun apiAllBanks(): List<Bank> {
-        return bankRepository.findAll().iterator().asSequence().toList()
-    }
+    fun apiAllBanks() = bankRepository.findAll().asSequence().toList()
+
+    @GetMapping("/all-currency-groups")
+    fun apiAllCurrencyGroups() = currencyGroupRepository.findAll().asSequence().toList()
+
+    @GetMapping("/all-currencies")
+    fun apiAllCurrencies() = currencyRepository.findAll().asSequence().toList()
 
 }

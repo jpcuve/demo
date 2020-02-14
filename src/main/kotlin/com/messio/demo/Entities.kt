@@ -1,5 +1,7 @@
 package com.messio.demo
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import org.springframework.data.annotation.ReadOnlyProperty
 import java.time.LocalTime
 import javax.persistence.*
 
@@ -32,10 +34,13 @@ class CurrencyGroup(
 
 @Entity
 @Table(name = "currencies", uniqueConstraints = [UniqueConstraint(columnNames = ["coin"])])
+@JsonIgnoreProperties("bank", "currencyGroup")
 class Currency(
         @Id @Column(name = "id") var id: Long,
         @ManyToOne @JoinColumn(name = "bank_id", nullable = false) var bank: Bank,
+        @Basic @Column(name = "bank_id", insertable = false, updatable = false) var bankId: Long,
         @ManyToOne @JoinColumn(name = "currency_group_id", nullable = false) var currencyGroup: CurrencyGroup,
+        @Basic @Column(name = "currency_group_id", insertable = false, updatable = false) var currencyGroupId: Long,
         @Enumerated(EnumType.STRING) @Column(name = "coin") var coin: Coin,
         @Basic @Column(name = "opening", nullable = false) var opening: LocalTime,
         @Basic @Column(name = "closing", nullable = false) var closing: LocalTime,

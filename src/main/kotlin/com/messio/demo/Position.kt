@@ -4,7 +4,7 @@ import java.math.BigDecimal
 import javax.persistence.AttributeConverter
 
 enum class Coin {
-    USD, EUR, JPY
+    USD, EUR, JPY, GBP
 }
 
 class Position : HashMap<Coin, BigDecimal> {
