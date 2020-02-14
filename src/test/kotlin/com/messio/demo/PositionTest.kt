@@ -13,7 +13,6 @@ class PositionTest {
     @Test
     fun codec(){
         assertEquals(p1, Position.parse("{USD=1, EUR=10}"))
-        print(p1)
     }
 
     @Test
