@@ -1,7 +1,6 @@
 package com.messio.demo
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import org.springframework.data.annotation.ReadOnlyProperty
 import java.time.LocalTime
 import javax.persistence.*
 
