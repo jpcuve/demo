@@ -30,13 +30,16 @@ class Position : HashMap<Coin, BigDecimal> {
 
         fun parse(s: String?): Position? {
             if (s == null) return null
-            if (s.length < 2 || s[0] != '{' || s[s.length - 1] != '}') throw RuntimeException()
-            val m = s.substring(1, s.length - 1)
+            val st = s.trim()
+            if (st.length < 2 || st[0] != '{' || st[s.lastIndex] != '}') return ZERO
+            return Position(
+                    st
+                    .substring(1, s.length - 1)
                     .split(',')
                     .filter { it.contains('=') }
                     .map { Pair(Coin.valueOf(it.substring(0, it.indexOf('=')).trim()), BigDecimal(it.substring(it.indexOf('=') + 1).trim())) }
                     .toMap()
-            return Position(m);
+            )
         }
     }
 }
