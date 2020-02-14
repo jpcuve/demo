@@ -12,14 +12,18 @@ class Position constructor(vararg amounts: Pair<String, BigDecimal>) : HashMap<S
         putAll(p)
     }
 
-    fun add(that: Position): Position = Position()
+    fun add(other: Position): Position {
+        val p = Position(other)
+        val m = mapValues { it.value.add(p.getOrDefault(it.key, BigDecimal.ZERO)) }
+        return Position(m)
+    }
 
-    fun negate(): Position = Position(mapValues { it.value.negate() })
+    fun negate() = Position(mapValues { it.value.negate() })
 
-    fun normalize(): Position = Position(filter { it.value.signum() != 0 })
+    fun normalize() = Position(filter { it.value.signum() != 0 })
 
     companion object {
-        val ZERO: Position = Position("USD" to BigDecimal(1)).negate()
+        val ZERO = Position("USD" to BigDecimal.ONE).add(Position("USD" to BigDecimal.ONE, "EUR" to BigDecimal.TEN))
 
         fun parse(s: String?): Position? {
             if (s == null) return null
