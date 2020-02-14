@@ -3,35 +3,46 @@ package com.messio.demo
 import java.math.BigDecimal
 import javax.persistence.AttributeConverter
 
-class Position constructor(vararg amounts: Pair<String, BigDecimal>) : HashMap<String, BigDecimal>() {
-    init {
+enum class Coin {
+    USD, EUR, JPY
+}
+
+class Position : HashMap<Coin, BigDecimal> {
+    constructor(map: Map<Coin, BigDecimal>) : super(map)
+
+    constructor(vararg amounts: Pair<Coin, BigDecimal>) {
         amounts.forEach { put(it.first, it.second) }
+        normalize()
     }
 
-    constructor(p: Map<String, BigDecimal>) : this() {
-        putAll(p)
-    }
-
-    fun add(other: Position) = other.mapValuesTo(Position(this), { other.getOrDefault(it.key, BigDecimal.ZERO).add(it.value) }).normalize()
+    fun add(other: Position) = other.mapValuesTo(Position(this), { getOrDefault(it.key, BigDecimal.ZERO).add(it.value) }).normalize()
 
     fun subtract(other: Position) = other.mapValuesTo(Position(this), { getOrDefault(it.key, BigDecimal.ZERO).subtract(it.value) }).normalize()
 
-    fun negate() = Position(mapValues { it.value.negate() })
+    fun negate() = Position(mapValues { it.value.negate() }).normalize()
 
     fun normalize() = Position(filter { it.value.signum() != 0 })
 
+    fun isZero() = normalize().isEmpty()
+
     companion object {
-        val ZERO = Position("USD" to BigDecimal.ONE, "JPY" to BigDecimal.TEN).subtract(Position("USD" to BigDecimal.ONE, "EUR" to BigDecimal.TEN))
+        val ZERO = Position()
 
         fun parse(s: String?): Position? {
             if (s == null) return null
-            return ZERO;
+            if (s.length < 2 || s[0] != '{' || s[s.length - 1] != '}') throw RuntimeException()
+            val m = s.substring(1, s.length - 1)
+                    .split(',')
+                    .filter { it.contains('=') }
+                    .map { Pair(Coin.valueOf(it.substring(0, it.indexOf('=')).trim()), BigDecimal(it.substring(it.indexOf('=') + 1).trim())) }
+                    .toMap()
+            return Position(m);
         }
     }
 }
 
 
-class PositionConverter: AttributeConverter<Position, String> {
+class PositionConverter : AttributeConverter<Position, String> {
     override fun convertToDatabaseColumn(attribute: Position?): String? = attribute?.toString()
     override fun convertToEntityAttribute(dbData: String?): Position? = Position.parse(dbData)
 }
