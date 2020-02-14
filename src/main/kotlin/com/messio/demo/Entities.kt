@@ -7,8 +7,9 @@ import javax.persistence.*
 @Table(name = "accounts", uniqueConstraints = [UniqueConstraint(columnNames = ["name", "bank_id"])])
 class Account(
         @Id @Column(name = "id") var id: Long,
+        @ManyToOne @JoinColumn(name = "bank_id", nullable = false) var bank: Bank,
         @Basic @Column(name = "name", nullable = false) var name: String,
-        @ManyToOne @JoinColumn(name = "bank_id", nullable = false) var bank: Bank
+        @Convert(converter = PositionConverter::class) @Column(name = "short_position_limit", nullable = false) var shortPositionLimit: Position
 )
 
 @Entity
@@ -16,7 +17,28 @@ class Account(
 class Bank(
         @Id @Column(name = "id") var id: Long,
         @Basic @Column(name = "name", nullable = false, unique = true) var name: String,
-        @Basic @Column(name = "opening", nullable = false) var opening: LocalTime = LocalTime.of(8, 0),
-        @Basic @Column(name = "closing", nullable = false) var closing: LocalTime = LocalTime.of(17, 0),
-        @Convert(converter = PositionConverter::class) @Column(name = "minimum_pay_in", nullable = false) var minimumPayIn: Position = Position.ZERO
+        @Basic @Column(name = "opening", nullable = false) var opening: LocalTime,
+        @Basic @Column(name = "closing", nullable = false) var closing: LocalTime,
+        @Basic @Column(name = "settlement_completion_target", nullable = false) var settlementCompletionTarget: LocalTime,
+        @Convert(converter = PositionConverter::class) @Column(name = "minimum_pay_in", nullable = false) var minimumPayIn: Position
+)
+
+@Entity
+@Table(name = "currency_groups", uniqueConstraints = [UniqueConstraint(columnNames = ["name"])])
+class CurrencyGroup(
+        @Id @Column(name = "id") var id: Long,
+        @Basic @Column(name = "name", nullable = false, unique = true) var name: String
+)
+
+@Entity
+@Table(name = "currencies", uniqueConstraints = [UniqueConstraint(columnNames = ["coin"])])
+class Currency(
+        @Id @Column(name = "id") var id: Long,
+        @ManyToOne @JoinColumn(name = "bank_id", nullable = false) var bank: Bank,
+        @ManyToOne @JoinColumn(name = "currency_group_id", nullable = false) var currencyGroup: CurrencyGroup,
+        @Enumerated(EnumType.STRING) @Column(name = "coin") var coin: Coin,
+        @Basic @Column(name = "opening", nullable = false) var opening: LocalTime,
+        @Basic @Column(name = "closing", nullable = false) var closing: LocalTime,
+        @Basic @Column(name = "funding_completion_target", nullable = false) var fundingCompletionTarget: LocalTime,
+        @Basic @Column(name = "close", nullable = false) var close: LocalTime
 )
