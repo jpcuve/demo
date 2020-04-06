@@ -5,14 +5,10 @@ import org.springframework.stereotype.Service
 
 @Service
 class SchedulerService {
-    val logger = LoggerFactory.getLogger(SchedulerService::class.java)
-
-    init {
-        logger.debug("Scheduler service initializing")
-    }
+    private val logger = LoggerFactory.getLogger(SchedulerService::class.java)
 
     fun enter(event: BaseEvent) {
-
+        logger.debug("Entering ${event.name}")
     }
 
     fun enterAbs(event: BaseEvent) {
