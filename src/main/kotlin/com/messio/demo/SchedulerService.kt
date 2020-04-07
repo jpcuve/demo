@@ -14,4 +14,8 @@ class SchedulerService {
     fun enterAbs(event: BaseEvent) {
 
     }
+
+    fun run(blocking: Boolean = true){
+
+    }
 }
