@@ -19,9 +19,15 @@ interface CurrencyRepository: CrudRepository<Currency, Long> {
     fun findByBank(bank: Bank): Iterable<Currency>
 }
 
+@Repository
+interface InstructionRepository: CrudRepository<Instruction, Long> {
+    fun findByBank(bank: Bank): Iterable<Instruction>
+}
+
 @Component
 class Facade(
         val bankRepository: BankRepository,
         val currencyGroupRepository: CurrencyGroupRepository,
-        val currencyRepository: CurrencyRepository
+        val currencyRepository: CurrencyRepository,
+        val instructionRepository: InstructionRepository
 )

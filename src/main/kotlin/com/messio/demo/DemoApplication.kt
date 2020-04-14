@@ -16,6 +16,16 @@ class DemoApplication(val facade: Facade, val schedulerService: SchedulerService
             }
             schedulerService.enter(BankEvent(this, bank.closing, "${bank.name} closing", bank))
         }
+        // testing db operations
+        facade.bankRepository.findByName("TEST-01")?.let {
+            val instruction: Instruction = Transfer(
+                    counterparty = "C",
+                    amount = Position.parse("{JPY=100}") ?: Position.ZERO,
+                    reference = "TEST2"
+            )
+            instruction.bank = it
+            facade.instructionRepository.save(instruction)
+        }
     }
 }
 

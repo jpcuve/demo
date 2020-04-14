@@ -2,6 +2,7 @@ package com.messio.demo
 
 import java.math.BigDecimal
 import javax.persistence.AttributeConverter
+import javax.persistence.Converter
 
 enum class Coin {
     USD, EUR, JPY, GBP
@@ -45,6 +46,7 @@ class Position : HashMap<Coin, BigDecimal> {
 }
 
 
+@Converter(autoApply = true)
 class PositionConverter : AttributeConverter<Position, String> {
     override fun convertToDatabaseColumn(attribute: Position?): String? = attribute?.toString()
     override fun convertToEntityAttribute(dbData: String?): Position? = Position.parse(dbData)
