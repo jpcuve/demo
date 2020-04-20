@@ -1,20 +1,23 @@
 package com.messio.demo
 
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
 
 @SpringBootApplication
-class DemoApplication(val facade: Facade, val schedulerService: SchedulerService) {
+class DemoApplication @Autowired constructor(val facade: Facade, val schedulerService: SchedulerService) {
+
     init {
         facade.bankRepository.findAll().forEach{ bank ->
-            schedulerService.enter(BankEvent(this, bank.opening, "${bank.name} opening", bank))
+            schedulerService.enter(BankEvent(this, bank.opening, "opening", bank))
+            schedulerService.enter(BankEvent(this, bank.settlementCompletionTarget, "settlement completion target", bank))
+            schedulerService.enter(BankEvent(this, bank.closing, "closing", bank))
             facade.currencyRepository.findByBank(bank).forEach {currency ->
-                schedulerService.enter(CurrencyEvent(this, currency.opening, "${currency.coin} opening", currency))
-                schedulerService.enter(CurrencyEvent(this, currency.fundingCompletionTarget, "${currency.coin} funding completion target", currency))
-                schedulerService.enter(CurrencyEvent(this, currency.closing, "${currency.coin} closing", currency))
-                schedulerService.enter(CurrencyEvent(this, currency.close, "${currency.coin} close", currency))
+                schedulerService.enter(CurrencyEvent(this, currency.opening, "opening", currency))
+                schedulerService.enter(CurrencyEvent(this, currency.fundingCompletionTarget, "funding completion target", currency))
+                schedulerService.enter(CurrencyEvent(this, currency.closing, "closing", currency))
+                schedulerService.enter(CurrencyEvent(this, currency.close, "close", currency))
             }
-            schedulerService.enter(BankEvent(this, bank.closing, "${bank.name} closing", bank))
         }
         // testing db operations
         facade.bankRepository.findByName("TEST-01")?.let {

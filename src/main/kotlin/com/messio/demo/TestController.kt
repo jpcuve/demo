@@ -5,9 +5,7 @@ import org.springframework.web.bind.annotation.GetMapping
 import org.springframework.web.bind.annotation.RestController
 
 @RestController
-class TestController @Autowired constructor(
-        val facade: Facade
-) {
+class TestController @Autowired constructor(val facade: Facade) {
     @GetMapping("/all-banks")
     fun apiAllBanks() = facade.bankRepository.findAll().asSequence().toList()
 
