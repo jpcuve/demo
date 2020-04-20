@@ -29,6 +29,8 @@ class DemoApplication @Autowired constructor(val facade: Facade, val schedulerSe
             instruction.bank = it
             facade.instructionRepository.save(instruction)
         }
+        // test
+        schedulerService.run()
     }
 }
 

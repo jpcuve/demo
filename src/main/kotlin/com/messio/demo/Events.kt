@@ -27,13 +27,13 @@ abstract class BankModel: ApplicationListener<BaseEvent> {
                 "closing" -> bankClosing(event.instant, event.bank)
             }
             else -> when(event.name){
-                "init" -> init()
-                "done" -> done()
+                "init" -> initDay()
+                "done" -> doneDay()
             }
         }
     }
 
-    abstract fun init()
+    abstract fun initDay()
     abstract fun bankOpening(time: LocalTime, bank: Bank)
     abstract fun currencyOpening(time: LocalTime, currency: Currency)
     abstract fun currencyFundingCompletionTarget(time: LocalTime, currency: Currency)
@@ -41,5 +41,5 @@ abstract class BankModel: ApplicationListener<BaseEvent> {
     abstract fun currencyClose(time: LocalTime, currency: Currency)
     abstract fun settlementCompletionTarget(time: LocalTime, bank: Bank)
     abstract fun bankClosing(time: LocalTime, bank: Bank)
-    abstract fun done()
+    abstract fun doneDay()
 }
