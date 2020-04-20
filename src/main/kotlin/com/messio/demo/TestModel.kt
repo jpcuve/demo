@@ -10,34 +10,34 @@ class TestModel: BankModel() {
     }
 
     override fun bankOpening(time: LocalTime, bank: Bank) {
-        print("opening $bank")
+        print("Opening: $bank")
     }
 
     override fun currencyOpening(time: LocalTime, currency: Currency) {
-        TODO("Not yet implemented")
+        print("Opening currency: $currency")
     }
 
     override fun currencyFundingCompletionTarget(time: LocalTime, currency: Currency) {
-        TODO("Not yet implemented")
+        print("FCT currency: $currency")
     }
 
     override fun currencyClosing(time: LocalTime, currency: Currency) {
-        TODO("Not yet implemented")
+        print("Closing currency: $currency")
     }
 
     override fun currencyClose(time: LocalTime, currency: Currency) {
-        TODO("Not yet implemented")
+        print("Close currency: $currency")
     }
 
     override fun settlementCompletionTarget(time: LocalTime, bank: Bank) {
-        TODO("Not yet implemented")
+        print("SCT: $bank")
     }
 
     override fun bankClosing(time: LocalTime, bank: Bank) {
-        TODO("Not yet implemented")
+        print("Closing: $bank")
     }
 
     override fun doneDay() {
-        TODO("Not yet implemented")
+        print("Done day")
     }
 }
