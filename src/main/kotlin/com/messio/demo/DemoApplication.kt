@@ -3,12 +3,15 @@ package com.messio.demo
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
+import java.time.LocalTime
 
 @SpringBootApplication
 class DemoApplication @Autowired constructor(val facade: Facade, val schedulerService: SchedulerService) {
 
     init {
         facade.bankRepository.findAll().forEach{ bank ->
+            schedulerService.enter(BaseEvent(this, LocalTime.MIN, "opening"))
+            schedulerService.enter(BaseEvent(this, LocalTime.MAX, "closing"))
             schedulerService.enter(BankEvent(this, bank.opening, "opening", bank))
             schedulerService.enter(BankEvent(this, bank.settlementCompletionTarget, "settlement completion target", bank))
             schedulerService.enter(BankEvent(this, bank.closing, "closing", bank))

@@ -27,8 +27,8 @@ abstract class BankModel: ApplicationListener<BaseEvent> {
                 "closing" -> bankClosing(event.instant, event.bank)
             }
             else -> when(event.name){
-                "init" -> initDay()
-                "done" -> doneDay()
+                "opening" -> initDay()
+                "closing" -> doneDay()
             }
         }
     }
