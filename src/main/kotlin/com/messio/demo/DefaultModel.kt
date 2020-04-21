@@ -18,19 +18,19 @@ class DefaultModel(val facade: Facade): BankModel() {
     }
 
     override fun currencyOpening(time: LocalTime, currency: Currency) {
-        logger.debug("Opening currency: $currency")
+        logger.debug("Opening currency: ${currency.bank} $currency")
     }
 
     override fun currencyFundingCompletionTarget(time: LocalTime, currency: Currency) {
-        logger.debug("FCT currency: $currency")
+        logger.debug("FCT currency: ${currency.bank} $currency")
     }
 
     override fun currencyClosing(time: LocalTime, currency: Currency) {
-        logger.debug("Closing currency: $currency")
+        logger.debug("Closing currency: ${currency.bank} $currency")
     }
 
     override fun currencyClose(time: LocalTime, currency: Currency) {
-        logger.debug("Close currency: $currency")
+        logger.debug("Close currency: ${currency.bank} $currency")
     }
 
     override fun settlementCompletionTarget(time: LocalTime, bank: Bank) {
