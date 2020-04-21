@@ -78,7 +78,6 @@ enum class InstructionType {
 @Entity
 @Table(name = "instructions")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@DiscriminatorColumn(name = "disc")
 @JsonIgnoreProperties("bank")
 open class Instruction(
         @Id @Column(name = "id") var id: Long = 0,
@@ -93,7 +92,6 @@ open class Instruction(
 }
 
 @Entity
-@DiscriminatorValue("T")
 class Transfer(
         override var moment: LocalTime? = null,
         override var type: InstructionType = InstructionType.TRANSFER,

@@ -14,5 +14,5 @@ insert into accounts(id, bank_id, name, short_position_limit) values
 (2, 1, 'a', ''),
 (3, 1, 'b', ''),
 (4, 1, 'c', '');
-insert into instructions(id, bank_id, disc, moment, principal, reference, amount, counterparty) values
-(1, 1, 'T', '08:00', 'A', 'TEST', '{}', 'B');
+insert into instructions(id, bank_id, dtype, moment, principal, reference, amount, counterparty) values
+(1, 1, 'Instruction', '08:00', 'A', 'TEST', '{}', 'B');
