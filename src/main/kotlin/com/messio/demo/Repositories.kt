@@ -20,6 +20,11 @@ interface CurrencyRepository: CrudRepository<Currency, Long> {
 }
 
 @Repository
+interface MovementRepository: CrudRepository<Movement, Long> {
+    fun findByBank(bank: Bank): Iterable<Movement>
+}
+
+@Repository
 interface InstructionRepository: CrudRepository<Instruction, Long> {
     fun findByBank(bank: Bank): Iterable<Instruction>
 }
@@ -29,5 +34,6 @@ class Facade(
         val bankRepository: BankRepository,
         val currencyGroupRepository: CurrencyGroupRepository,
         val currencyRepository: CurrencyRepository,
+        val movementRepository: MovementRepository,
         val instructionRepository: InstructionRepository
 )

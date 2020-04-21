@@ -6,7 +6,9 @@ import org.springframework.boot.runApplication
 import java.time.LocalTime
 
 @SpringBootApplication
-class DemoApplication @Autowired constructor(val facade: Facade, val schedulerService: SchedulerService) {
+class DemoApplication @Autowired constructor(
+        val facade: Facade,
+        val schedulerService: SchedulerService) {
 
     init {
         facade.bankRepository.findAll().forEach{ bank ->

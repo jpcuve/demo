@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RestController
 
 @RestController
 @RequestMapping("/master")
-class MasterController @Autowired constructor(val appProperties: AppProperties) {
+class MasterController @Autowired constructor(appProperties: AppProperties) {
     private val logger: Logger = LoggerFactory.getLogger(MasterController::class.java)
 
     init {

@@ -24,7 +24,9 @@ class Bank(
         @Column(name = "closing", nullable = false) var closing: LocalTime = LocalTime.MAX,
         @Column(name = "settlement_completion_target", nullable = false) var settlementCompletionTarget: LocalTime = LocalTime.NOON,
         @Column(name = "minimum_pay_in", nullable = false) var minimumPayIn: Position = Position.ZERO
-)
+){
+    override fun toString(): String = name
+}
 
 @Entity
 @Table(name = "currency_groups", uniqueConstraints = [UniqueConstraint(columnNames = ["name"])])
@@ -49,7 +51,26 @@ class Currency(
     @Column(name = "bank_id", insertable = false, updatable = false) var bankId: Long = 0L
     @ManyToOne @JoinColumn(name = "currency_group_id", nullable = false) lateinit var currencyGroup: CurrencyGroup
     @Column(name = "currency_group_id", insertable = false, updatable = false) var currencyGroupId: Long = 0L
+    override fun toString(): String = coin.toString()
 }
+
+@Entity
+@Table(name = "movements")
+@JsonIgnoreProperties("bank", "db", "cr")
+class Movement(
+        @Id @Column(name = "id") var id: Long = 0L,
+        @Column(name = "moment", nullable = false) open var moment: LocalTime = LocalTime.MIN,
+        @Column(name = "value", nullable = false) var value: Position = Position.ZERO,
+        @Column(name = "name", nullable = false, unique = true) var name: String = ""
+){
+    @ManyToOne @JoinColumn(name = "bank_id", nullable = false) lateinit var bank: Bank
+    @Column(name = "bank_id", insertable = false, updatable = false) var bankId: Long = 0L
+    @ManyToOne @JoinColumn(name = "db_id", nullable = false) lateinit var db: Account
+    @Column(name = "db_id", insertable = false, updatable = false) var dbId: Long = 0L
+    @ManyToOne @JoinColumn(name = "cr_id", nullable = false) lateinit var cr: Account
+    @Column(name = "cr_id", insertable = false, updatable = false) var crId: Long = 0L
+}
+
 
 @Entity
 @Table(name = "instructions")

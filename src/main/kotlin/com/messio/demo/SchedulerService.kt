@@ -13,7 +13,6 @@ class SchedulerService @Autowired constructor(val publisher: ApplicationEventPub
     private val events: SortedMap<LocalTime, BaseEvent> = TreeMap()
 
     fun enter(event: BaseEvent) {
-        logger.debug("Entering ${event.name}")
         events[event.instant] = event
     }
 
