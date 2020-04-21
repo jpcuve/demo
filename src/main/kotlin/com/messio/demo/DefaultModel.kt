@@ -9,6 +9,7 @@ class DefaultModel(val facade: Facade): BankModel() {
     private val logger = LoggerFactory.getLogger(DefaultModel::class.java)
 
     override fun initDay() {
+        logger.debug("Clearing all movements")
         facade.movementRepository.deleteAll()
     }
 

@@ -24,16 +24,6 @@ class DemoApplication @Autowired constructor(
                 schedulerService.enter(CurrencyEvent(this, currency.close, "close", currency))
             }
         }
-        // testing db operations
-        facade.bankRepository.findByName("TEST-01")?.let {
-            val instruction: Instruction = Transfer(
-                    counterparty = "C",
-                    amount = Position.parse("{JPY=100}") ?: Position.ZERO,
-                    reference = "TEST2"
-            )
-            instruction.bank = it
-            facade.instructionRepository.save(instruction)
-        }
         // test
         schedulerService.run()
     }
