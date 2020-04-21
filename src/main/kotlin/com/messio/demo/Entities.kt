@@ -71,6 +71,9 @@ class Movement(
     @Column(name = "cr_id", insertable = false, updatable = false) var crId: Long = 0L
 }
 
+enum class InstructionType {
+    PAY_IN, PAY_OUT, SETTLEMENT, TRANSFER
+}
 
 @Entity
 @Table(name = "instructions")
@@ -80,6 +83,7 @@ class Movement(
 open class Instruction(
         @Id @Column(name = "id") var id: Long = 0,
         @Column(name = "moment", nullable = true) open var moment: LocalTime? = null,
+        @Enumerated(EnumType.STRING) open var type: InstructionType = InstructionType.PAY_IN,
         @Column(name = "principal", nullable = false) open var principal: String = "",
         @Column(name = "reference", nullable = false) open var reference: String = "",
         @Column(name = "amount", nullable = false) open var amount: Position = Position.ZERO
@@ -92,8 +96,9 @@ open class Instruction(
 @DiscriminatorValue("T")
 class Transfer(
         override var moment: LocalTime? = null,
+        override var type: InstructionType = InstructionType.TRANSFER,
         override var principal: String = "",
         override var reference: String = "",
         override var amount: Position = Position.ZERO,
         @Column(name = "counterparty", nullable = false) var counterparty: String = ""
-): Instruction(moment = moment, principal = principal, reference = reference, amount = amount)
+): Instruction(moment = moment, type = type, principal = principal, reference = reference, amount = amount)

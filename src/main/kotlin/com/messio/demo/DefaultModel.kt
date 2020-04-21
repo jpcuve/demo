@@ -5,11 +5,11 @@ import org.springframework.stereotype.Component
 import java.time.LocalTime
 
 @Component
-class TestModel: BankModel() {
-    private val logger = LoggerFactory.getLogger(TestModel::class.java)
+class DefaultModel(val facade: Facade): BankModel() {
+    private val logger = LoggerFactory.getLogger(DefaultModel::class.java)
 
     override fun initDay() {
-        logger.debug("Init day")
+        facade.movementRepository.deleteAll()
     }
 
     override fun bankOpening(time: LocalTime, bank: Bank) {
