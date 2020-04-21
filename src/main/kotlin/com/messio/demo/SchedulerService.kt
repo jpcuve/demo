@@ -16,10 +16,6 @@ class SchedulerService @Autowired constructor(val publisher: ApplicationEventPub
         events[event.instant] = event
     }
 
-    fun enterAbs(event: BaseEvent) {
-
-    }
-
     fun run(blocking: Boolean = true){
         events.values.forEach {
             publisher.publishEvent(it)
