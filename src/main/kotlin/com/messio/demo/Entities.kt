@@ -58,23 +58,6 @@ class Currency(
     override fun toString(): String = coin.toString()
 }
 
-@Entity
-@Table(name = "movements")
-@JsonIgnoreProperties("bank", "db", "cr")
-class Movement(
-        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
-        @Column(name = "moment", nullable = false) open var moment: LocalTime = LocalTime.MIN,
-        @Column(name = "value", nullable = false) var value: Position = Position.ZERO,
-        @Column(name = "name", nullable = false, unique = true) var name: String = ""
-){
-    @ManyToOne @JoinColumn(name = "bank_id", nullable = false) lateinit var bank: Bank
-    @Column(name = "bank_id", insertable = false, updatable = false) var bankId: Long = 0L
-    @ManyToOne @JoinColumn(name = "db_id", nullable = false) lateinit var db: Account
-    @Column(name = "db_id", insertable = false, updatable = false) var dbId: Long = 0L
-    @ManyToOne @JoinColumn(name = "cr_id", nullable = false) lateinit var cr: Account
-    @Column(name = "cr_id", insertable = false, updatable = false) var crId: Long = 0L
-}
-
 enum class InstructionType {
     PAY, PAY_IN, PAY_OUT, SETTLEMENT
 }
@@ -87,6 +70,7 @@ class Instruction(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0,
         @Column(name = "moment", nullable = false) var moment: LocalTime = LocalTime.MIN,
         @Column(name = "book_id", nullable = true) var bookId: Long? = null,
+        @Column(name = "booked", nullable = true) var booked: LocalTime? = null,
         @Enumerated(EnumType.STRING) @Column(name = "instruction_type", nullable = false) var type: InstructionType = InstructionType.PAY,
         @Column(name = "principal", nullable = false) var principal: String = "",
         @Column(name = "counterparty", nullable = false) var counterparty: String = "",

@@ -25,12 +25,12 @@ class BuildOneModel(val facade: Facade) : BankModel() {
 
     override fun currencyClosing(time: LocalTime, currency: Currency) {
         facade.instructionRepository
-                .findAllByBankAndType(currency.bank, InstructionType.PAY_OUT)
+                .findAllByBankAndTypeAndBookedIsNull(currency.bank, InstructionType.PAY_OUT)
                 .filter {
-                    !it.moment.isAfter(time) && it.bookId == null && it.amount.containsKey(currency.coin)
+                    !it.moment.isAfter(time) && it.amount.containsKey(currency.coin)
                 }
                 .forEach {
-                    facade.book(it)
+                    facade.book(it, time)
                 }
     }
 
@@ -41,13 +41,13 @@ class BuildOneModel(val facade: Facade) : BankModel() {
         logger.debug("Booking pay-ins")
         val balance = Balance()
         facade.instructionRepository
-                .findAllByBankAndType(bank, InstructionType.PAY_IN)
+                .findAllByBankAndTypeAndBookedIsNull(bank, InstructionType.PAY_IN)
                 .filter {
-                    !it.moment.isAfter(time) && it.bookId == null
+                    !it.moment.isAfter(time)
                 }
                 .forEach {
                     logger.debug("Booking: $it")
-                    facade.book(it)
+                    facade.book(it, time)
                     balance.transfer(it.principal, it.counterparty, it.amount)
                 }
         logger.debug("Settling sequentially")
@@ -56,12 +56,12 @@ class BuildOneModel(val facade: Facade) : BankModel() {
             settledCount.set(0)
             // simplest stuff, run once and only allow if sufficient provision on account
             facade.instructionRepository
-                    .findAllByBankAndType(bank, InstructionType.SETTLEMENT)
+                    .findAllByBankAndTypeAndBookedIsNull(bank, InstructionType.SETTLEMENT)
                     .filter {
-                        !it.moment.isAfter(time) && it.bookId == null && balance.isProvisioned(it.principal, it.amount)
+                        !it.moment.isAfter(time) && balance.isProvisioned(it.principal, it.amount)
                     }
                     .forEach {
-                        facade.book(it)
+                        facade.book(it, time)
                         balance.transfer(it.principal, it.counterparty, it.amount)
                         settledCount.incrementAndGet()
                     }

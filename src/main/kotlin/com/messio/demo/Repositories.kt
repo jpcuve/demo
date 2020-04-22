@@ -26,14 +26,10 @@ interface CurrencyRepository: CrudRepository<Currency, Long> {
 }
 
 @Repository
-interface MovementRepository: CrudRepository<Movement, Long> {
-    fun findByBank(bank: Bank): Iterable<Movement>
-}
-
-@Repository
 interface InstructionRepository: CrudRepository<Instruction, Long> {
     fun findAllByBank(bank: Bank): Iterable<Instruction>
-    fun findAllByBankAndType(bank: Bank, type: InstructionType): Iterable<Instruction>
+    fun findAllByBankAndTypeAndBookedIsNull(bank: Bank, type: InstructionType): Iterable<Instruction>
+    fun findAllByBankAndTypeAndBookedIsNotNull(bank: Bank, type: InstructionType): Iterable<Instruction>
     @Query("select max(i.bookId) from Instruction i")
     fun findMaxBookId(): Long?
 }
@@ -43,14 +39,14 @@ class Facade(
         val bankRepository: BankRepository,
         val currencyGroupRepository: CurrencyGroupRepository,
         val currencyRepository: CurrencyRepository,
-        val movementRepository: MovementRepository,
         val instructionRepository: InstructionRepository
 ){
-    fun book(instruction: Instruction){
+    fun book(instruction: Instruction, time: LocalTime){
         val maxBookId = instructionRepository.findMaxBookId() ?: 0L
         logger.debug("Max book id: $maxBookId")
         instructionRepository.findById(instruction.id).ifPresent {
             it.bookId = maxBookId + 1
+            it.booked = time
             instructionRepository.save(it)
         }
     }
