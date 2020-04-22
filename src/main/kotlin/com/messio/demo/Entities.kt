@@ -84,19 +84,10 @@ open class Instruction(
         @Column(name = "moment", nullable = true) open var moment: LocalTime? = null,
         @Enumerated(EnumType.STRING) @Column(name = "instruction_type", nullable = false) open var type: InstructionType = InstructionType.PAY_IN,
         @Column(name = "principal", nullable = false) open var principal: String = "",
+        @Column(name = "counterparty", nullable = true) var counterparty: String = "",
         @Column(name = "reference", nullable = false) open var reference: String = "",
         @Column(name = "amount", nullable = false) open var amount: Position = Position.ZERO
 ){
     @ManyToOne @JoinColumn(name = "bank_id", nullable = false) open lateinit var bank: Bank
     @Column(name = "bank_id", insertable = false, updatable = false) open var bankId: Long = 0L
 }
-
-@Entity
-class Transfer(
-        override var moment: LocalTime? = null,
-        override var type: InstructionType = InstructionType.PAY,
-        override var principal: String = "",
-        override var reference: String = "",
-        override var amount: Position = Position.ZERO,
-        @Column(name = "counterparty", nullable = false) var counterparty: String = ""
-): Instruction(moment = moment, type = type, principal = principal, reference = reference, amount = amount)
