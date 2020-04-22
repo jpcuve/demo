@@ -10,7 +10,6 @@ class Balance: TreeMap<String, Position>() {
     }
 
     fun isProvisioned(principal: String, amount: Position): Boolean {
-        val projectedPosition = this[principal] ?: Position.ZERO
-        return projectedPosition.subtract(amount).isLong()
+        return (this[principal] ?: Position.ZERO).subtract(amount).isLong()
     }
 }
