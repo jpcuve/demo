@@ -13,6 +13,10 @@ class Account(
 ){
     @ManyToOne @JoinColumn(name = "bank_id", nullable = false) lateinit var bank: Bank
     @Column(name = "bank_id", insertable = false, updatable = false) var bankId: Long = 0L
+
+    companion object {
+        val MIRROR_NAME = "__MIRROR__"
+    }
 }
 
 @Entity
@@ -72,22 +76,24 @@ class Movement(
 }
 
 enum class InstructionType {
-    PAY_IN, PAY_OUT, SETTLEMENT, PAY
+    PAY, PAY_IN, PAY_OUT, SETTLEMENT
 }
 
 @Entity
 @Table(name = "instructions")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @JsonIgnoreProperties("bank")
-open class Instruction(
+class Instruction(
         @Id @Column(name = "id") var id: Long = 0,
-        @Column(name = "moment", nullable = true) open var moment: LocalTime? = null,
-        @Enumerated(EnumType.STRING) @Column(name = "instruction_type", nullable = false) open var type: InstructionType = InstructionType.PAY_IN,
-        @Column(name = "principal", nullable = false) open var principal: String = "",
-        @Column(name = "counterparty", nullable = true) var counterparty: String = "",
-        @Column(name = "reference", nullable = false) open var reference: String = "",
-        @Column(name = "amount", nullable = false) open var amount: Position = Position.ZERO
+        @Column(name = "moment", nullable = false) var moment: LocalTime = LocalTime.MIN,
+        @Column(name = "book_id", nullable = true) var bookId: Long? = null,
+        @Enumerated(EnumType.STRING) @Column(name = "instruction_type", nullable = false) var type: InstructionType = InstructionType.PAY,
+        @Column(name = "principal", nullable = false) var principal: String = "",
+        @Column(name = "counterparty", nullable = false) var counterparty: String = "",
+        @Column(name = "reference", nullable = false) var reference: String = "",
+        @Column(name = "amount", nullable = false) var amount: Position = Position.ZERO
 ){
-    @ManyToOne @JoinColumn(name = "bank_id", nullable = false) open lateinit var bank: Bank
-    @Column(name = "bank_id", insertable = false, updatable = false) open var bankId: Long = 0L
+    @ManyToOne @JoinColumn(name = "bank_id", nullable = false) lateinit var bank: Bank
+    @Column(name = "bank_id", insertable = false, updatable = false) var bankId: Long = 0L
+    override fun toString(): String = "$type $principal $counterparty $amount"
 }
