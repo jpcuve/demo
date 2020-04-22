@@ -46,7 +46,6 @@ class BuildOneModel(val facade: Facade) : BankModel() {
                     !it.moment.isAfter(time)
                 }
                 .forEach {
-                    logger.debug("Booking: $it")
                     facade.book(it, time)
                     balance.transfer(it.principal, it.counterparty, it.amount)
                 }

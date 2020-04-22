@@ -44,6 +44,7 @@ class Facade(
     fun book(instruction: Instruction, time: LocalTime){
         val maxBookId = instructionRepository.findMaxBookId() ?: 0L
         instructionRepository.findById(instruction.id).ifPresent {
+            logger.debug("Booking @ $time: $instruction")
             it.bookId = maxBookId + 1
             it.booked = time
             instructionRepository.save(it)
