@@ -9,7 +9,14 @@ enum class Coin {
 }
 
 class Position : HashMap<Coin, BigDecimal> {
+    constructor(): super()
+
     constructor(map: Map<Coin, BigDecimal>) : super(map)
+
+    constructor(vararg amounts: Map.Entry<Coin, BigDecimal>){
+        amounts.forEach { put(it.key, it.value) }
+        normalize()
+    }
 
     constructor(vararg amounts: Pair<Coin, BigDecimal>) {
         amounts.forEach { put(it.first, it.second) }
@@ -23,6 +30,10 @@ class Position : HashMap<Coin, BigDecimal> {
     fun negate() = Position(mapValues { it.value.negate() }).normalize()
 
     fun normalize() = Position(filter { it.value.signum() != 0 })
+
+    fun xlong() = Position(filter { it.value.signum() > 0})
+
+    fun xshort() = Position(filter { it.value.signum() < 0})
 
     fun isZero() = normalize().isEmpty()
 

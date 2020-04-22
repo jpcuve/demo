@@ -1,10 +1,14 @@
 package com.messio.demo
 
+import org.slf4j.LoggerFactory
 import org.springframework.data.jpa.repository.Query
 import org.springframework.data.repository.CrudRepository
 import org.springframework.stereotype.Component
 import org.springframework.stereotype.Repository
+import org.springframework.transaction.annotation.Transactional
 import java.time.LocalTime
+
+val logger = LoggerFactory.getLogger("com.messio.demo.repositories")
 
 @Repository
 interface BankRepository: CrudRepository<Bank, Long> {
@@ -29,9 +33,9 @@ interface MovementRepository: CrudRepository<Movement, Long> {
 @Repository
 interface InstructionRepository: CrudRepository<Instruction, Long> {
     fun findAllByBank(bank: Bank): Iterable<Instruction>
-    fun findAllByBankAndTypeAndMomentLessThanEqual(bank: Bank, type: InstructionType, moment: LocalTime): Iterable<Instruction>
-    @Query("select max(i.id) from Instruction i")
-    fun findMaxId(): Long?
+    fun findAllByBankAndTypeAndMomentLessThanEqualAndBookIdIsNull(bank: Bank, type: InstructionType, moment: LocalTime): Iterable<Instruction>
+    @Query("select max(i.bookId) from Instruction i")
+    fun findMaxBookId(): Long?
 }
 
 @Component
@@ -43,10 +47,11 @@ class Facade(
         val instructionRepository: InstructionRepository
 ){
     fun book(instruction: Instruction){
-        val maxId = instructionRepository.findMaxId() ?: 1L
+        val maxBookId = instructionRepository.findMaxBookId() ?: 0L
+        logger.debug("Max book id: $maxBookId")
         instructionRepository.findById(instruction.id).ifPresent {
-            it.bookId = maxId + 1
-            instructionRepository.save(instruction)
+            it.bookId = maxBookId + 1
+            instructionRepository.save(it)
         }
     }
 }

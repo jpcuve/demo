@@ -7,7 +7,7 @@ import javax.persistence.*
 @Entity
 @Table(name = "accounts", uniqueConstraints = [UniqueConstraint(columnNames = ["name", "bank_id"])])
 class Account(
-        @Id @Column(name = "id") var id: Long = 0L,
+        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
         @Column(name = "name", nullable = false) var name: String = "",
         @Column(name = "short_position_limit", nullable = false) var shortPositionLimit: Position = Position.ZERO
 ){
@@ -22,7 +22,7 @@ class Account(
 @Entity
 @Table(name = "banks", uniqueConstraints = [UniqueConstraint(columnNames = ["name"])])
 class Bank(
-        @Id @Column(name = "id") var id: Long = 0L,
+        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
         @Column(name = "name", nullable = false, unique = true) var name: String = "",
         @Column(name = "opening", nullable = false) var opening: LocalTime = LocalTime.MIN,
         @Column(name = "closing", nullable = false) var closing: LocalTime = LocalTime.MAX,
@@ -35,7 +35,7 @@ class Bank(
 @Entity
 @Table(name = "currency_groups", uniqueConstraints = [UniqueConstraint(columnNames = ["name"])])
 class CurrencyGroup(
-        @Id @Column(name = "id") var id: Long = 0L,
+        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
         @Column(name = "name", nullable = false, unique = true) var name: String = "",
         @Column(name = "priority", nullable = false) var priority: Int = 0
 )
@@ -44,7 +44,7 @@ class CurrencyGroup(
 @Table(name = "currencies", uniqueConstraints = [UniqueConstraint(columnNames = ["coin"])])
 @JsonIgnoreProperties("bank", "currencyGroup")
 class Currency(
-        @Id @Column(name = "id") var id: Long = 0L,
+        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
         @Enumerated(EnumType.STRING) @Column(name = "coin") var coin: Coin = Coin.EUR,
         @Column(name = "opening", nullable = false) var opening: LocalTime = LocalTime.MIN,
         @Column(name = "closing", nullable = false) var closing: LocalTime = LocalTime.MAX,
@@ -62,7 +62,7 @@ class Currency(
 @Table(name = "movements")
 @JsonIgnoreProperties("bank", "db", "cr")
 class Movement(
-        @Id @Column(name = "id") var id: Long = 0L,
+        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
         @Column(name = "moment", nullable = false) open var moment: LocalTime = LocalTime.MIN,
         @Column(name = "value", nullable = false) var value: Position = Position.ZERO,
         @Column(name = "name", nullable = false, unique = true) var name: String = ""
@@ -84,7 +84,7 @@ enum class InstructionType {
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
 @JsonIgnoreProperties("bank")
 class Instruction(
-        @Id @Column(name = "id") var id: Long = 0,
+        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0,
         @Column(name = "moment", nullable = false) var moment: LocalTime = LocalTime.MIN,
         @Column(name = "book_id", nullable = true) var bookId: Long? = null,
         @Enumerated(EnumType.STRING) @Column(name = "instruction_type", nullable = false) var type: InstructionType = InstructionType.PAY,
