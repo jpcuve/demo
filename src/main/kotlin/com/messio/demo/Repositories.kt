@@ -33,7 +33,7 @@ interface MovementRepository: CrudRepository<Movement, Long> {
 @Repository
 interface InstructionRepository: CrudRepository<Instruction, Long> {
     fun findAllByBank(bank: Bank): Iterable<Instruction>
-    fun findAllByBankAndTypeAndMomentLessThanEqualAndBookIdIsNull(bank: Bank, type: InstructionType, moment: LocalTime): Iterable<Instruction>
+    fun findAllByBankAndType(bank: Bank, type: InstructionType): Iterable<Instruction>
     @Query("select max(i.bookId) from Instruction i")
     fun findMaxBookId(): Long?
 }

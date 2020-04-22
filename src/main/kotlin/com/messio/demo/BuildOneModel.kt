@@ -24,6 +24,14 @@ class BuildOneModel(val facade: Facade) : BankModel() {
     }
 
     override fun currencyClosing(time: LocalTime, currency: Currency) {
+        facade.instructionRepository
+                .findAllByBankAndType(currency.bank, InstructionType.PAY_OUT)
+                .filter {
+                    !it.moment.isAfter(time) && it.bookId == null && it.amount.containsKey(currency.coin)
+                }
+                .forEach {
+                    facade.book(it)
+                }
     }
 
     override fun currencyClose(time: LocalTime, currency: Currency) {
@@ -33,7 +41,10 @@ class BuildOneModel(val facade: Facade) : BankModel() {
         logger.debug("Booking pay-ins")
         val balance = Balance()
         facade.instructionRepository
-                .findAllByBankAndTypeAndMomentLessThanEqualAndBookIdIsNull(bank, InstructionType.PAY_IN, time)
+                .findAllByBankAndType(bank, InstructionType.PAY_IN)
+                .filter {
+                    !it.moment.isAfter(time) && it.bookId == null
+                }
                 .forEach {
                     logger.debug("Booking: $it")
                     facade.book(it)
@@ -45,17 +56,18 @@ class BuildOneModel(val facade: Facade) : BankModel() {
             settledCount.set(0)
             // simplest stuff, run once and only allow if sufficient provision on account
             facade.instructionRepository
-                    .findAllByBankAndTypeAndMomentLessThanEqualAndBookIdIsNull(bank, InstructionType.SETTLEMENT, time)
+                    .findAllByBankAndType(bank, InstructionType.SETTLEMENT)
                     .filter {
-                        balance.isProvisioned(it.principal, it.amount)
-                    }.forEach {
+                        !it.moment.isAfter(time) && it.bookId == null && balance.isProvisioned(it.principal, it.amount)
+                    }
+                    .forEach {
                         facade.book(it)
                         balance.transfer(it.principal, it.counterparty, it.amount)
                         settledCount.incrementAndGet()
                     }
             logger.debug("Count of instructions settled: $settledCount")
         } while (settledCount.get() > 0)
-        logger.debug("$balance")
+        logger.debug("Generating pay-outs")
         balance
                 .filter { it.key != MIRROR_NAME }
                 .forEach { e ->
