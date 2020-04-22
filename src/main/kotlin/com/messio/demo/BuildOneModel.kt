@@ -1,5 +1,6 @@
 package com.messio.demo
 
+import com.messio.demo.Account.Companion.MIRROR_NAME
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.stereotype.Component
@@ -52,6 +53,9 @@ class BuildOneModel(val facade: Facade): BankModel(){
         } while (settledCount.get() > 0)
         logger.debug("Creating pay-outs")
         logger.debug("$balance")
+        balance.entries.filter { it.key != MIRROR_NAME }.forEach {
+
+        }
     }
 
     override fun bankClosing(time: LocalTime, bank: Bank) {

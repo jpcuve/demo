@@ -26,23 +26,9 @@ class Position : HashMap<Coin, BigDecimal> {
 
     fun isZero() = normalize().isEmpty()
 
-    fun isLong(): Boolean {
-        for (amount in normalize().values) {
-            if (amount.signum() < 0) {
-                return false
-            }
-        }
-        return !isZero()
-    }
+    fun isLong(): Boolean = normalize().values.all { it.signum() > 0}
 
-    fun isShort(): Boolean {
-        for (amount in normalize().values) {
-            if (amount.signum() > 0) {
-                return false
-            }
-        }
-        return !isZero()
-    }
+    fun isShort(): Boolean = normalize().values.all { it.signum() < 0 }
 
     companion object {
         val ZERO = Position()

@@ -1,6 +1,6 @@
 package com.messio.demo
 
-import org.junit.jupiter.api.Assertions.assertEquals
+import org.junit.jupiter.api.Assertions.*
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.TestInstance
 import java.math.BigDecimal
@@ -17,11 +17,19 @@ class PositionTest {
 
     @Test
     fun basic(){
-        assertEquals(true, Position().isZero())
-        assertEquals(true, Position(Coin.JPY to BigDecimal.ZERO).isZero())
+        assertTrue(Position().isZero())
+        assertTrue(Position(Coin.JPY to BigDecimal.ZERO).isZero())
         assertEquals(Position(Coin.USD to BigDecimal.ONE.negate(), Coin.EUR to BigDecimal.TEN.negate()), p1.negate())
         assertEquals(Position.parse("{USD=-2,EUR=10,JPY=1}"), p1.add(p2))
         assertEquals(Position.parse("{USD=4,EUR=10,JPY=-1}"), p1.subtract(p2))
+    }
+
+    @Test
+    fun shortAndLong(){
+        assertTrue((Position.parse("{EUR=10,JPY=1}") ?: Position.ZERO).isLong())
+        assertFalse((Position.parse("{USD=-2,EUR=10,JPY=1}") ?: Position.ZERO).isLong())
+        assertFalse((Position.parse("{USD=-2,EUR=10,JPY=1}") ?: Position.ZERO).isShort())
+        assertTrue((Position.parse("{USD=-2,EUR=-10}") ?: Position.ZERO).isShort())
     }
 
 }
