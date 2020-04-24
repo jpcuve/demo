@@ -22,9 +22,6 @@ class MasterController @Autowired constructor(
         logger.debug("App prop: ${appProperties.defaultBank}")
     }
 
-    @GetMapping("/default")
-    fun apiDefault() = "OK"
-
     @GetMapping("/statement")
     fun apiStatement(
             @RequestParam("bank-name") bankName: String,
@@ -39,4 +36,16 @@ class MasterController @Autowired constructor(
                 }
                 ?: emptyList()
     }
+
+    @GetMapping("/all-banks")
+    fun apiAllBanks() = facade.bankRepository.findAll().asSequence().toList()
+
+    @GetMapping("/all-currency-groups")
+    fun apiAllCurrencyGroups() = facade.currencyGroupRepository.findAllByOrderByPriority().asSequence().toList()
+
+    @GetMapping("/all-currencies")
+    fun apiAllCurrencies() = facade.currencyRepository.findAll().asSequence().toList()
+
+    @GetMapping("/all-instructions")
+    fun apiAllInstructions() = facade.instructionRepository.findAll().asSequence().toList()
 }
