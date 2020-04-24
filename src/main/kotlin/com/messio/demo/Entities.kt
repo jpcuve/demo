@@ -79,5 +79,9 @@ class Instruction(
 ){
     @ManyToOne @JoinColumn(name = "bank_id", nullable = false) lateinit var bank: Bank
     @Column(name = "bank_id", insertable = false, updatable = false) var bankId: Long = 0L
+
+    val partyNames: List<String>
+            get() = listOf(principal, counterparty)
+
     override fun toString(): String = "$type $principal $counterparty $amount"
 }
