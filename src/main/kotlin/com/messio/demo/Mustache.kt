@@ -32,12 +32,10 @@ class MustacheAdvice {
     fun skeleton() = MapLambda()
 
     @ModelAttribute("title")
-    fun title(
-            @ModelAttribute("skeleton") skeleton: MapLambda
-    ) = Mustache.Lambda { fragment, _ -> skeleton["title"] = fragment.execute() }
+    fun title(@ModelAttribute("skeleton") skeleton: MapLambda)
+            = Mustache.Lambda { fragment, _ -> skeleton["title"] = fragment.execute() }
 
     @ModelAttribute("name")
-    fun name(
-            @ModelAttribute("skeleton") skeleton: MapLambda
-    ) = Mustache.Lambda { fragment, _ -> skeleton["name"] = fragment.execute() }
+    fun name(@ModelAttribute("skeleton") skeleton: MapLambda)
+            = Mustache.Lambda { fragment, _ -> skeleton["name"] = fragment.execute() }
 }
