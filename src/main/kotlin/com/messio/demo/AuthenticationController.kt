@@ -10,7 +10,7 @@ import org.springframework.web.bind.annotation.RestController
 @CrossOrigin
 class AuthenticationController {
     @PostMapping("/sign-in")
-    fun apiSignIn(credentialsValue: CredentialsValue): User? {
+    fun apiSignIn(signInValue: SignInValue): User? {
         return null
     }
 }

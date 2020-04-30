@@ -1,3 +1,4 @@
 package com.messio.demo
 
-data class CredentialsValue(val email: String, val password: String)
+open class ResetPasswordValue(open var email: String?)
+class SignInValue(override var email: String?, var password: String?): ResetPasswordValue(email)
