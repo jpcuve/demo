@@ -26,38 +26,19 @@ class Account(
 class User(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
         @Column(name = "email", nullable = false, unique = true) var email: String = "",
-        @Column(name = "name", nullable = false, unique = true) var name: String = ""
+        @Column(name = "name", nullable = false) var name: String = "",
+        @Column(name = "pass", nullable = false) var pass: String = ""
 ): UserDetails{
     @ManyToOne @JoinColumn(name = "account_id", nullable = false) lateinit var account: Account
     @Column(name = "account_id", insertable = false, updatable = false) var accountId: Long = 0L
 
-    override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
-        TODO("Not yet implemented")
-    }
-
-    override fun isEnabled(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun getUsername(): String {
-        TODO("Not yet implemented")
-    }
-
-    override fun isCredentialsNonExpired(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun getPassword(): String {
-        TODO("Not yet implemented")
-    }
-
-    override fun isAccountNonExpired(): Boolean {
-        TODO("Not yet implemented")
-    }
-
-    override fun isAccountNonLocked(): Boolean {
-        TODO("Not yet implemented")
-    }
+    override fun getAuthorities(): MutableCollection<out GrantedAuthority> = arrayListOf()
+    override fun isEnabled(): Boolean = true
+    override fun getUsername(): String = email
+    override fun isCredentialsNonExpired(): Boolean = true
+    override fun getPassword(): String = pass
+    override fun isAccountNonExpired(): Boolean = true
+    override fun isAccountNonLocked(): Boolean = true
 }
 
 

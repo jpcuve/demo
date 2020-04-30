@@ -5,24 +5,22 @@ import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Value
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
-import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.AuthenticationProvider
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
-import org.springframework.security.core.Authentication
 import org.springframework.security.core.userdetails.UserDetailsService
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.AuthenticationEntryPoint
 import org.springframework.security.web.authentication.www.BasicAuthenticationEntryPoint
-import org.springframework.security.web.authentication.www.BasicAuthenticationFilter
 import java.security.SecureRandom
 
 
 @Configuration
 class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter() {
     private val logger: Logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
+
     @Value("\${app.realm}")
     private val realm: String? = null
 
@@ -54,6 +52,7 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
         return UserDetailsService { username: String -> facade.userRepository.findTopByEmail(username) }
     }
 
+/*
     @Bean
     override fun authenticationManager(): AuthenticationManager {
         return AuthenticationManager { authentication ->
@@ -62,14 +61,16 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
         }
     }
 
-    @Bean
-    fun passwordEncoder(): PasswordEncoder {
-        return BCryptPasswordEncoder(10, SecureRandom())
-    }
 
     @Bean
     fun basicAuthenticationFilter(authenticationManager: AuthenticationManager?, authenticationEntryPoint: AuthenticationEntryPoint?): BasicAuthenticationFilter {
         return BasicAuthenticationFilter(authenticationManager, authenticationEntryPoint)
+    }
+*/
+
+    @Bean
+    fun passwordEncoder(): PasswordEncoder {
+        return BCryptPasswordEncoder(10, SecureRandom())
     }
 
     @Bean
