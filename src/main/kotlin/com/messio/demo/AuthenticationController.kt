@@ -1,7 +1,6 @@
 package com.messio.demo
 
 import org.springframework.web.bind.annotation.*
-import java.util.*
 
 @RestController
 @RequestMapping("/auth")
@@ -9,13 +8,13 @@ import java.util.*
 class AuthenticationController(val facade: Facade) {
     @PostMapping("/sign-in")
     fun apiSignIn(@RequestBody signInValue: SignInValue): UserValue {
-        val user: User = facade.userRepository.findById(0L).orElse(User())
-        return UserValue(email = user.email)
+        val user: User = facade.userRepository.findTopByEmail(signInValue.email) ?: User()
+        return UserValue(user.email)
     }
 
     @GetMapping("/sign-out")
-    fun apiSignOut(): String {
-        return "ok"
+    fun apiSignOut(): UserValue {
+        return UserValue()
     }
 
     @PostMapping("/sign-up")

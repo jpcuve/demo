@@ -1,4 +1,5 @@
 app:
+  realm: demo
   default-bank: TEST-01
 spring:
   datasource:

@@ -1,11 +1,17 @@
 package com.messio.demo
 
-import org.springframework.ui.Model
-import org.springframework.web.bind.annotation.*
-import java.io.Writer
 import com.samskivert.mustache.Mustache
 import com.samskivert.mustache.Template
+import org.springframework.beans.factory.annotation.Value
+import org.springframework.core.io.Resource
 import org.springframework.stereotype.Controller
+import org.springframework.stereotype.Service
+import org.springframework.ui.Model
+import org.springframework.web.bind.annotation.ControllerAdvice
+import org.springframework.web.bind.annotation.GetMapping
+import org.springframework.web.bind.annotation.ModelAttribute
+import org.springframework.web.bind.annotation.RequestMapping
+import java.io.*
 
 
 @Controller
@@ -38,4 +44,26 @@ class MustacheAdvice {
     @ModelAttribute("name")
     fun name(@ModelAttribute("skeleton") skeleton: MapLambda)
             = Mustache.Lambda { fragment, _ -> skeleton["name"] = fragment.execute() }
+}
+
+@Service
+class MustacheService {
+    private val compiler = Mustache.compiler()
+
+    @Value("classpath:/templates/")
+    private val templateFolder: Resource? = null
+
+    @Value(".mustache")
+    private val suffix = ".mustache"
+
+    @Value("UTF-8")
+    private val charset = "UTF-8"
+
+    @Throws(IOException::class)
+    fun assemble(templateName: String, model: Map<String?, Any?>?): String {
+        FileInputStream(File(templateFolder!!.file, templateName + suffix)).use { `is` ->
+            val template = compiler.compile(InputStreamReader(`is`, charset))
+            return template.execute(model)
+        }
+    }
 }

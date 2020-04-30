@@ -35,10 +35,12 @@ interface BankRepository : CrudRepository<Bank, Long> {
 }
 
 @Repository
-interface AccountRepository: CrudRepository<Account, Long>
+interface AccountRepository : CrudRepository<Account, Long>
 
 @Repository
-interface UserRepository: CrudRepository<User, Long>
+interface UserRepository : CrudRepository<User, Long> {
+    fun findTopByEmail(email: String): User?
+}
 
 @Repository
 interface CurrencyGroupRepository : CrudRepository<CurrencyGroup, Long> {

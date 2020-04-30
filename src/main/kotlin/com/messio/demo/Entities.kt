@@ -1,6 +1,8 @@
 package com.messio.demo
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
+import org.springframework.security.core.GrantedAuthority
+import org.springframework.security.core.userdetails.UserDetails
 import java.time.LocalTime
 import javax.persistence.*
 
@@ -25,9 +27,37 @@ class User(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
         @Column(name = "email", nullable = false, unique = true) var email: String = "",
         @Column(name = "name", nullable = false, unique = true) var name: String = ""
-){
+): UserDetails{
     @ManyToOne @JoinColumn(name = "account_id", nullable = false) lateinit var account: Account
     @Column(name = "account_id", insertable = false, updatable = false) var accountId: Long = 0L
+
+    override fun getAuthorities(): MutableCollection<out GrantedAuthority> {
+        TODO("Not yet implemented")
+    }
+
+    override fun isEnabled(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun getUsername(): String {
+        TODO("Not yet implemented")
+    }
+
+    override fun isCredentialsNonExpired(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun getPassword(): String {
+        TODO("Not yet implemented")
+    }
+
+    override fun isAccountNonExpired(): Boolean {
+        TODO("Not yet implemented")
+    }
+
+    override fun isAccountNonLocked(): Boolean {
+        TODO("Not yet implemented")
+    }
 }
 
 
