@@ -1,4 +1,7 @@
 package com.messio.demo
 
-open class ResetPasswordValue(open var email: String?)
-class SignInValue(override var email: String?, var password: String?): ResetPasswordValue(email)
+data class SignInValue(val email: String = "", val password: String = "")
+data class GoogleSignInValue(val token: String = "")
+data class SignUpValue(val email: String = "", val password: String = "", val name: String = "")
+data class UpdatePasswordValue(val newPassword: String = "", val newPasswordConfirmation: String = "", val token: String = "")
+data class ResetPasswordValue(val email: String = "")
