@@ -1,14 +1,16 @@
 package com.messio.demo
 
 import org.springframework.web.bind.annotation.*
+import java.util.*
 
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin
-class AuthenticationController {
+class AuthenticationController(val facade: Facade) {
     @PostMapping("/sign-in")
-    fun apiSignIn(@RequestBody signInValue: SignInValue): User? {
-        return null
+    fun apiSignIn(@RequestBody signInValue: SignInValue): UserValue {
+        val user: User = facade.userRepository.findById(0L).orElse(User())
+        return UserValue(email = user.email)
     }
 
     @GetMapping("/sign-out")

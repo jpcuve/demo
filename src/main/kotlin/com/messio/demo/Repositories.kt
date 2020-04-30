@@ -12,6 +12,8 @@ val logger = LoggerFactory.getLogger("com.messio.demo.repositories")
 @Component
 class Facade(
         val bankRepository: BankRepository,
+        val accountRepository: AccountRepository,
+        val userRepository: UserRepository,
         val currencyGroupRepository: CurrencyGroupRepository,
         val currencyRepository: CurrencyRepository,
         val instructionRepository: InstructionRepository
@@ -31,6 +33,12 @@ class Facade(
 interface BankRepository : CrudRepository<Bank, Long> {
     fun findByName(name: String): Bank?
 }
+
+@Repository
+interface AccountRepository: CrudRepository<Account, Long>
+
+@Repository
+interface UserRepository: CrudRepository<User, Long>
 
 @Repository
 interface CurrencyGroupRepository : CrudRepository<CurrencyGroup, Long> {
