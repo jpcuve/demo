@@ -20,6 +20,18 @@ class Account(
 }
 
 @Entity
+@Table(name = "users")
+class User(
+        @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
+        @Column(name = "email", nullable = false, unique = true) var email: String = "",
+        @Column(name = "name", nullable = false, unique = true) var name: String = ""
+){
+    @ManyToOne @JoinColumn(name = "account_id", nullable = false) lateinit var account: Account
+    @Column(name = "account_id", insertable = false, updatable = false) var accountId: Long = 0L
+}
+
+
+@Entity
 @Table(name = "banks", uniqueConstraints = [UniqueConstraint(columnNames = ["name"])])
 class Bank(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
