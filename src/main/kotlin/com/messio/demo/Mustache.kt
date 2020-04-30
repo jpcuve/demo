@@ -9,7 +9,7 @@ import org.springframework.stereotype.Controller
 
 
 @Controller
-@RequestMapping("/")
+@RequestMapping("/mustache")
 class MustacheController {
     @GetMapping
     fun apiIndex(model: Model): String {
