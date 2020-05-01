@@ -51,17 +51,15 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
 
     @Bean
     override fun authenticationManager(): AuthenticationManager {
-        return object : AuthenticationManager {
-            override fun authenticate(authentication: Authentication?): Authentication {
-                // check out if authentication ok, set the granted authorities as well, set authenticated = true
-
-                return authentication ?: throw BadCredentialsException("Not authenticated")
-            }
+        return AuthenticationManager { authentication ->
+            // check out if authentication ok, set the granted authorities as well, set authenticated = true
+            authentication ?: throw BadCredentialsException("Not authenticated")
         }
     }
 
     @Bean
-    fun passwordEncoder(): PasswordEncoder? {
+    fun passwordEncoder(): PasswordEncoder {
         return BCryptPasswordEncoder(10, SecureRandom())
     }
+
 }
