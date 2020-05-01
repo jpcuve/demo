@@ -1,15 +1,28 @@
 package com.messio.demo
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.web.bind.annotation.*
+import javax.servlet.ServletException
+import javax.servlet.http.HttpServletRequest
 
 @RestController
 @RequestMapping("/auth")
 @CrossOrigin
 class AuthenticationController(val facade: Facade) {
+    private val logger: Logger = LoggerFactory.getLogger(AuthenticationController::class.java)
+
     @PostMapping("/sign-in")
-    fun apiSignIn(@RequestBody signInValue: SignInValue): UserValue {
-        val user: User = facade.userRepository.findTopByEmail(signInValue.email) ?: User()
-        return UserValue(user.email)
+    fun apiSignIn(@RequestBody signInValue: SignInValue, @Autowired req: HttpServletRequest): UserValue {
+        try {
+            req.login(signInValue.email, signInValue.password)
+            val user: User = facade.userRepository.findTopByEmail(signInValue.email) ?: User()
+            return UserValue(user.email)
+        } catch (e: ServletException){
+            logger.info("Login failed: ${signInValue.email}")
+        }
+        return UserValue()
     }
 
     @GetMapping("/sign-out")
