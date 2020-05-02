@@ -7,7 +7,7 @@ import org.springframework.web.bind.annotation.*
 
 @RestController
 @RequestMapping("/master")
-@CrossOrigin
+@CrossOrigin(allowCredentials = "true")
 class MasterController @Autowired constructor(
         val appProperties: AppProperties,
         val facade: Facade

@@ -3,9 +3,12 @@ package com.messio.demo
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
+import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
+import org.springframework.http.HttpMethod
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -16,10 +19,63 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter
+import org.springframework.web.bind.annotation.*
+import org.springframework.web.cors.CorsConfiguration
+import org.springframework.web.cors.CorsConfigurationSource
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import java.nio.charset.StandardCharsets
 import java.security.SecureRandom
+import java.util.*
 import javax.servlet.Filter
+import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
+
+const val SECURITY_WEB_CONTEXT = "/auth"
+const val AUTHORIZATION_PREFIX = "Bearer "
+
+@RestController
+@RequestMapping(SECURITY_WEB_CONTEXT)
+@CrossOrigin
+class SecurityController(val facade: Facade) {
+    private val logger: Logger = LoggerFactory.getLogger(SecurityController::class.java)
+
+    @PostMapping("/sign-in")
+    fun apiSignIn(@RequestBody signInValue: SignInValue, @Autowired req: HttpServletRequest): UserValue {
+        try {
+            req.login(signInValue.email, signInValue.password)
+            val user: User = facade.userRepository.findTopByEmail(signInValue.email) ?: User()
+            return UserValue(user.email)
+        } catch (e: ServletException) {
+            logger.info("Login failed: ${signInValue.email}")
+        }
+        return UserValue()
+    }
+
+    @GetMapping("/sign-out")
+    fun apiSignOut(): UserValue {
+        return UserValue()
+    }
+
+    @PostMapping("/sign-up")
+    fun apiSignUp(@RequestBody signUpValue: SignUpValue): String {
+        return "ok"
+    }
+
+    @PostMapping("/update-password")
+    fun apiUpdatePassword(@RequestBody updatePasswordValue: UpdatePasswordValue): String {
+        return "ok"
+    }
+
+    @PostMapping("/reset-password")
+    fun apiResetPassword(@RequestBody resetPasswordValue: ResetPasswordValue): String {
+        return "ok"
+    }
+
+    @PostMapping("/google-sign-in")
+    fun apiGoogleSignIn(@RequestBody googleSignInValue: GoogleSignInValue): String {
+        return "ok"
+    }
+}
 
 
 @Configuration
@@ -38,11 +94,11 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
     override fun configure(http: HttpSecurity) {
         logger.debug("Token: $token")
         http
-                .csrf().disable()
                 .addFilter(preAuthTokenHeaderFilter())
                 .authorizeRequests()
+                .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
-                .antMatchers("/auth/**").permitAll()
+                .antMatchers("$SECURITY_WEB_CONTEXT/**").permitAll()
                 .anyRequest().authenticated()
     }
 
@@ -50,7 +106,13 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
     fun preAuthTokenHeaderFilter(): Filter {
         val filter = object : AbstractPreAuthenticatedProcessingFilter() {
             override fun getPreAuthenticatedPrincipal(request: HttpServletRequest): Any? {
-                return request.getHeader("Authorization")
+                logger.debug("Request: ${request.method} ${request.requestURI}")
+                for (name in request.headerNames){
+                    logger.debug(" Header: $name=${request.getHeader(name)}")
+                }
+                val header = request.getHeader("Authorization")
+                logger.debug("Authorization: $header")
+                return header
             }
 
             override fun getPreAuthenticatedCredentials(request: HttpServletRequest): Any {
@@ -66,8 +128,8 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
         return object : AuthenticationManager {
             override fun authenticate(authentication: Authentication): Authentication {
                 val authorizationHeader = authentication.principal.toString()
-                if (authorizationHeader.startsWith("Bearer ", ignoreCase = true)){
-                    val token = authorizationHeader.substring(7).trim()
+                if (authorizationHeader.startsWith(AUTHORIZATION_PREFIX, ignoreCase = true)) {
+                    val token = authorizationHeader.substring(AUTHORIZATION_PREFIX.length).trim()
                     try {
                         val claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token)
                         logger.debug("Claims: ${claims}")
@@ -75,7 +137,10 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
                                 .split(",")
                                 .map { SimpleGrantedAuthority(it) }
                                 .toList()
-                        return UsernamePasswordAuthenticationToken(claims.body.subject, null, grantedAuthorities)
+                        return UsernamePasswordAuthenticationToken(
+                                claims.body.subject,
+                                null,
+                                grantedAuthorities)
                     } catch (e: JwtException) {
                         logger.error("Cannot decode jwt", e)
                     }
@@ -89,5 +154,4 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
     fun passwordEncoder(): PasswordEncoder {
         return BCryptPasswordEncoder(10, SecureRandom())
     }
-
 }
