@@ -1,6 +1,9 @@
 package com.messio.demo
 
-import org.slf4j.Logger
+import io.jsonwebtoken.JwtException
+import io.jsonwebtoken.Jwts
+import io.jsonwebtoken.SignatureAlgorithm
+import io.jsonwebtoken.security.Keys
 import org.slf4j.LoggerFactory
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
@@ -19,9 +22,12 @@ import javax.servlet.http.HttpServletRequest
 
 @Configuration
 class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter() {
-    private val logger: Logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
+    private val logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
+    private val key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
+    private val token = Jwts.builder().setSubject("Joe").signWith(key).compact()
 
     override fun configure(http: HttpSecurity) {
+        logger.debug("Token: $token")
         http
                 .csrf().disable()
                 .addFilter(preAuthTokenHeaderFilter())
@@ -35,10 +41,10 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
     fun preAuthTokenHeaderFilter(): Filter {
         val filter = object : AbstractPreAuthenticatedProcessingFilter() {
             override fun getPreAuthenticatedPrincipal(request: HttpServletRequest): Any? {
-                val authorizationHeader = request.getHeader("Authorization") ?: return null
+                val authorizationHeader = request.getHeader("Authorization")
                 logger.debug("Authorization header: $authorizationHeader")
-                // here decode the JWT token, return the token contents or null
-                return UserValue(email = "text")
+                // return the token as principal, or null
+                return token
             }
 
             override fun getPreAuthenticatedCredentials(request: HttpServletRequest): Any {
@@ -52,10 +58,16 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
     @Bean
     override fun authenticationManager(): AuthenticationManager {
         return object : AuthenticationManager {
-            override fun authenticate(authentication: Authentication?): Authentication {
+            override fun authenticate(authentication: Authentication): Authentication {
                 // check out if authentication ok, set the granted authorities as well, set authenticated = true
-
-                return authentication ?: throw BadCredentialsException("Not authenticated")
+                try {
+                    val claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token)
+                    logger.debug("Claims: ${claims}")
+                    authentication.isAuthenticated = true
+                    return authentication
+                } catch (e: JwtException) {
+                    throw BadCredentialsException("Not authenticated", e)
+                }
             }
         }
     }
