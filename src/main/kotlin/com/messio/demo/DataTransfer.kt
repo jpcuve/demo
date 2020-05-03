@@ -6,3 +6,4 @@ data class SignUpValue(val email: String = "", val password: String = "", val na
 data class UpdatePasswordValue(val newPassword: String = "", val newPasswordConfirmation: String = "", val token: String = "")
 data class ResetPasswordValue(val email: String = "")
 data class UserValue(val email: String = "")
+data class TokenValue(val token: String = "")

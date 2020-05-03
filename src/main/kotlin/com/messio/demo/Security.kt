@@ -1,5 +1,7 @@
 package com.messio.demo
 
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.Jws
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
@@ -17,11 +19,11 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter
 import org.springframework.web.bind.annotation.*
 import java.nio.charset.StandardCharsets
 import java.security.SecureRandom
+import javax.crypto.SecretKey
 import javax.servlet.Filter
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
@@ -31,8 +33,8 @@ const val AUTHORIZATION_PREFIX = "Bearer "
 
 @RestController
 @RequestMapping(SECURITY_WEB_CONTEXT)
-@CrossOrigin(methods = [RequestMethod.GET, RequestMethod.POST])
-class SecurityController(val facade: Facade) {
+@CrossOrigin
+class SecurityController(val facade: Facade, val keyManager: KeyManager) {
     private val logger: Logger = LoggerFactory.getLogger(SecurityController::class.java)
 
     @GetMapping()
@@ -41,20 +43,22 @@ class SecurityController(val facade: Facade) {
     }
 
     @PostMapping("/sign-in")
-    fun apiSignIn(@RequestBody signInValue: SignInValue, @Autowired req: HttpServletRequest): UserValue {
+    fun apiSignIn(@RequestBody signInValue: SignInValue, @Autowired req: HttpServletRequest): TokenValue {
         try {
             req.login(signInValue.email, signInValue.password)
             val user: User = facade.userRepository.findTopByEmail(signInValue.email) ?: User()
-            return UserValue(user.email)
+            val token = keyManager.buildToken(user)
+            logger.debug("Token: $token")
+            return TokenValue(token)
         } catch (e: ServletException) {
             logger.info("Login failed: ${signInValue.email}")
         }
-        return UserValue()
+        return TokenValue()
     }
 
     @GetMapping("/sign-out")
-    fun apiSignOut(): UserValue {
-        return UserValue()
+    fun apiSignOut(): TokenValue {
+        return TokenValue()
     }
 
     @PostMapping("/sign-up")
@@ -78,22 +82,30 @@ class SecurityController(val facade: Facade) {
     }
 }
 
+class KeyManager(val key: SecretKey) {
 
-@Configuration
-class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter() {
-    private val logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
-
-    // private val key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
-    private val key = Keys.hmacShaKeyFor("my_secret_key_must_be_long_enough".toByteArray(StandardCharsets.UTF_8));
-    private val token = Jwts
+    fun buildToken(user: User): String = Jwts
             .builder()
-            .setSubject("Joe")
+            .setSubject(user.email)
             .claim("roles", "a,b,c")
             .signWith(key)
             .compact()
 
+    fun verifyToken(token: String): Jws<Claims> = Jwts
+            .parserBuilder()
+            .setSigningKey(key)
+            .build()
+            .parseClaimsJws(token)
+}
+
+
+@Configuration
+class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter() {
+    private val logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
+    private val key = Keys.hmacShaKeyFor("my_secret_key_must_be_long_enough".toByteArray(StandardCharsets.UTF_8));
+    // private val key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
+
     override fun configure(http: HttpSecurity) {
-        logger.debug("Token: $token")
         http
                 .csrf().disable()
                 .addFilter(preAuthTokenHeaderFilter())
@@ -126,34 +138,33 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
     }
 
     @Bean
-    override fun authenticationManager(): AuthenticationManager {
-        return object : AuthenticationManager {
-            override fun authenticate(authentication: Authentication): Authentication {
-                val authorizationHeader = authentication.principal.toString()
-                if (authorizationHeader.startsWith(AUTHORIZATION_PREFIX, ignoreCase = true)) {
-                    val token = authorizationHeader.substring(AUTHORIZATION_PREFIX.length).trim()
-                    try {
-                        val claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token)
-                        logger.debug("Claims: ${claims}")
-                        val grantedAuthorities = claims.body["roles"].toString()
-                                .split(",")
-                                .map { SimpleGrantedAuthority(it) }
-                                .toList()
-                        return UsernamePasswordAuthenticationToken(
-                                claims.body.subject,
-                                null,
-                                grantedAuthorities)
-                    } catch (e: JwtException) {
-                        logger.error("Cannot decode jwt", e)
-                    }
+    override fun authenticationManager() = object : AuthenticationManager {
+        override fun authenticate(authentication: Authentication): Authentication {
+            val authorizationHeader = authentication.principal.toString()
+            if (authorizationHeader.startsWith(AUTHORIZATION_PREFIX, ignoreCase = true)) {
+                val token = authorizationHeader.substring(AUTHORIZATION_PREFIX.length).trim()
+                try {
+                    val claims = keyManager().verifyToken(token)
+                    logger.debug("Claims: ${claims}")
+                    val grantedAuthorities = claims.body["roles"].toString()
+                            .split(",")
+                            .map { SimpleGrantedAuthority(it) }
+                            .toList()
+                    return UsernamePasswordAuthenticationToken(
+                            claims.body.subject,
+                            null,
+                            grantedAuthorities)
+                } catch (e: JwtException) {
+                    logger.error("Cannot decode jwt", e)
                 }
-                throw BadCredentialsException("Not authenticated")
             }
+            throw BadCredentialsException("Not authenticated")
         }
     }
 
     @Bean
-    fun passwordEncoder(): PasswordEncoder {
-        return BCryptPasswordEncoder(10, SecureRandom())
-    }
+    fun keyManager() = KeyManager(key)
+
+    @Bean
+    fun passwordEncoder() = BCryptPasswordEncoder(10, SecureRandom())
 }
