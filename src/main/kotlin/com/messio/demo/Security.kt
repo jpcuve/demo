@@ -34,7 +34,7 @@ const val AUTHORIZATION_PREFIX = "Bearer "
 
 @RestController
 @RequestMapping(SECURITY_WEB_CONTEXT)
-@CrossOrigin
+@CrossOrigin(allowCredentials = "true")
 class SecurityController(val facade: Facade, val keyManager: KeyManager, val passwordEncoder: PasswordEncoder) {
     private val logger: Logger = LoggerFactory.getLogger(SecurityController::class.java)
 
@@ -46,11 +46,12 @@ class SecurityController(val facade: Facade, val keyManager: KeyManager, val pas
     @PostMapping("/sign-in")
     fun apiSignIn(@RequestBody signInValue: SignInValue, @Autowired req: HttpServletRequest): TokenValue {
         facade.userRepository.findTopByEmail(signInValue.email)?.let {
-            val encodedPassword = passwordEncoder.encode(it.pass)
-            logger.debug("Encoded password: $encodedPassword")
-            val token = keyManager.buildToken(it)
-            logger.debug("Token: $token")
-            return TokenValue(token)
+            if (passwordEncoder.matches(signInValue.password, it.pass)){
+                logger.debug("Login successful for: ${signInValue.email}")
+                val token = keyManager.buildToken(it)
+                logger.debug("Token: $token")
+                return TokenValue(token)
+            }
         }
         return TokenValue()
     }
