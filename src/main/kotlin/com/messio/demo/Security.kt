@@ -19,6 +19,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
+import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter
 import org.springframework.web.bind.annotation.*
 import java.nio.charset.StandardCharsets
@@ -34,7 +35,7 @@ const val AUTHORIZATION_PREFIX = "Bearer "
 @RestController
 @RequestMapping(SECURITY_WEB_CONTEXT)
 @CrossOrigin
-class SecurityController(val facade: Facade, val keyManager: KeyManager) {
+class SecurityController(val facade: Facade, val keyManager: KeyManager, val passwordEncoder: PasswordEncoder) {
     private val logger: Logger = LoggerFactory.getLogger(SecurityController::class.java)
 
     @GetMapping()
@@ -44,14 +45,12 @@ class SecurityController(val facade: Facade, val keyManager: KeyManager) {
 
     @PostMapping("/sign-in")
     fun apiSignIn(@RequestBody signInValue: SignInValue, @Autowired req: HttpServletRequest): TokenValue {
-        try {
-            req.login(signInValue.email, signInValue.password)
-            val user: User = facade.userRepository.findTopByEmail(signInValue.email) ?: User()
-            val token = keyManager.buildToken(user)
+        facade.userRepository.findTopByEmail(signInValue.email)?.let {
+            val encodedPassword = passwordEncoder.encode(it.pass)
+            logger.debug("Encoded password: $encodedPassword")
+            val token = keyManager.buildToken(it)
             logger.debug("Token: $token")
             return TokenValue(token)
-        } catch (e: ServletException) {
-            logger.info("Login failed: ${signInValue.email}")
         }
         return TokenValue()
     }
