@@ -20,12 +20,8 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter
 import org.springframework.web.bind.annotation.*
-import org.springframework.web.cors.CorsConfiguration
-import org.springframework.web.cors.CorsConfigurationSource
-import org.springframework.web.cors.UrlBasedCorsConfigurationSource
 import java.nio.charset.StandardCharsets
 import java.security.SecureRandom
-import java.util.*
 import javax.servlet.Filter
 import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
@@ -35,9 +31,14 @@ const val AUTHORIZATION_PREFIX = "Bearer "
 
 @RestController
 @RequestMapping(SECURITY_WEB_CONTEXT)
-@CrossOrigin
+@CrossOrigin(methods = [RequestMethod.GET, RequestMethod.POST])
 class SecurityController(val facade: Facade) {
     private val logger: Logger = LoggerFactory.getLogger(SecurityController::class.java)
+
+    @GetMapping()
+    fun apiRoot(): Map<String, String> {
+        return mapOf("ok" to "status")
+    }
 
     @PostMapping("/sign-in")
     fun apiSignIn(@RequestBody signInValue: SignInValue, @Autowired req: HttpServletRequest): UserValue {
@@ -94,6 +95,7 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
     override fun configure(http: HttpSecurity) {
         logger.debug("Token: $token")
         http
+                .csrf().disable()
                 .addFilter(preAuthTokenHeaderFilter())
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -107,7 +109,7 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
         val filter = object : AbstractPreAuthenticatedProcessingFilter() {
             override fun getPreAuthenticatedPrincipal(request: HttpServletRequest): Any? {
                 logger.debug("Request: ${request.method} ${request.requestURI}")
-                for (name in request.headerNames){
+                for (name in request.headerNames) {
                     logger.debug(" Header: $name=${request.getHeader(name)}")
                 }
                 val header = request.getHeader("Authorization")
