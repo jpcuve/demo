@@ -11,6 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
+import org.springframework.http.HttpStatus
+import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -40,6 +42,11 @@ class SecurityController(val facade: Facade, val keyManager: KeyManager, val pas
     @GetMapping()
     fun apiRoot(): Map<String, String> {
         return mapOf("ok" to "status")
+    }
+
+    @GetMapping("/error")
+    fun apiError(): ResponseEntity<HttpStatus> {
+        return ResponseEntity(HttpStatus.BAD_REQUEST)
     }
 
     @PostMapping("/sign-in")
