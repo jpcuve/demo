@@ -26,7 +26,6 @@ import java.nio.charset.StandardCharsets
 import java.security.SecureRandom
 import javax.crypto.SecretKey
 import javax.servlet.Filter
-import javax.servlet.ServletException
 import javax.servlet.http.HttpServletRequest
 
 const val SECURITY_WEB_CONTEXT = "/auth"
