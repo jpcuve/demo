@@ -43,21 +43,21 @@ class SecurityController(val facade: Facade, val keyManager: KeyManager, val pas
     }
 
     @PostMapping("/sign-in")
-    fun apiSignIn(@RequestBody signInValue: SignInValue, @Autowired req: HttpServletRequest): TokenValue {
+    fun apiSignIn(@RequestBody signInValue: SignInValue, @Autowired req: HttpServletRequest): ProfileValue {
         facade.userRepository.findTopByEmail(signInValue.email)?.let {
             if (passwordEncoder.matches(signInValue.password, it.pass)){
                 logger.debug("Login successful for: ${signInValue.email}")
                 val token = keyManager.buildToken(it)
                 logger.debug("Token: $token")
-                return TokenValue(token)
+                return ProfileValue(true, token, it.name, listOf())
             }
         }
-        return TokenValue()
+        return ProfileValue()
     }
 
     @GetMapping("/sign-out")
-    fun apiSignOut(): TokenValue {
-        return TokenValue()
+    fun apiSignOut(): ProfileValue {
+        return ProfileValue()
     }
 
     @PostMapping("/sign-up")
