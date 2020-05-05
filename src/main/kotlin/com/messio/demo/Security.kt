@@ -119,6 +119,7 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
                 .antMatchers("$SECURITY_WEB_CONTEXT/**").permitAll()
+                .antMatchers("/test-error").permitAll()
                 .anyRequest().authenticated()
     }
 
