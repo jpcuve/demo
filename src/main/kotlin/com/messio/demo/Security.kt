@@ -59,7 +59,7 @@ class SecurityController(val facade: Facade, val keyManager: KeyManager, val pas
                 return ProfileValue(true, token, it.name, listOf())
             }
         }
-        return ProfileValue()
+        throw CustomException("Invalid email / password")
     }
 
     @GetMapping("/sign-out")
@@ -146,13 +146,13 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
 
     @Bean
     override fun authenticationManager() = object : AuthenticationManager {
-        override fun authenticate(authentication: Authentication): Authentication {
+        override fun authenticate(authentication: Authentication): Authentication? {
             val authorizationHeader = authentication.principal.toString()
             if (authorizationHeader.startsWith(AUTHORIZATION_PREFIX, ignoreCase = true)) {
                 val token = authorizationHeader.substring(AUTHORIZATION_PREFIX.length).trim()
                 try {
                     val claims = keyManager().verifyToken(token)
-                    logger.debug("Claims: ${claims}")
+                    logger.debug("Claims: $claims")
                     val grantedAuthorities = claims.body["roles"].toString()
                             .split(",")
                             .map { SimpleGrantedAuthority(it) }
@@ -163,9 +163,10 @@ class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter()
                             grantedAuthorities)
                 } catch (e: JwtException) {
                     logger.error("Cannot decode jwt", e)
+                    throw BadCredentialsException("Not authenticated")
                 }
             }
-            throw BadCredentialsException("Not authenticated")
+            return authentication
         }
     }
 

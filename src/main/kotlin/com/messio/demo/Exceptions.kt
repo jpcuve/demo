@@ -10,7 +10,7 @@ class CustomException(message: String = "Unspecified") : RuntimeException(messag
 @RestControllerAdvice
 class ErrorHandler {
     @ExceptionHandler(CustomException::class)
-    @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+    @ResponseStatus(HttpStatus.OK)
     fun handleCustomException(ce: CustomException): Map<String, String> {
         return mapOf("error" to (ce.message ?: "Unspecified"))
     }
