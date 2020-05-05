@@ -1,8 +1,6 @@
 package com.messio.demo
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties
-import org.springframework.security.core.GrantedAuthority
-import org.springframework.security.core.userdetails.UserDetails
 import java.time.LocalTime
 import javax.persistence.*
 
@@ -12,9 +10,12 @@ class Account(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
         @Column(name = "name", nullable = false) var name: String = "",
         @Column(name = "short_position_limit", nullable = false) var shortPositionLimit: Position = Position.ZERO
-){
-    @ManyToOne @JoinColumn(name = "bank_id", nullable = false) lateinit var bank: Bank
-    @Column(name = "bank_id", insertable = false, updatable = false) var bankId: Long = 0L
+) {
+    @ManyToOne
+    @JoinColumn(name = "bank_id", nullable = false)
+    lateinit var bank: Bank
+    @Column(name = "bank_id", insertable = false, updatable = false)
+    var bankId: Long = 0L
 
     companion object {
         val MIRROR_NAME = "__MIRROR__"
@@ -27,18 +28,21 @@ class User(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
         @Column(name = "email", nullable = false, unique = true) var email: String = "",
         @Column(name = "name", nullable = false) var name: String = "",
-        @Column(name = "pass", nullable = false) var pass: String = ""
-): UserDetails{
-    @ManyToOne @JoinColumn(name = "account_id", nullable = false) lateinit var account: Account
-    @Column(name = "account_id", insertable = false, updatable = false) var accountId: Long = 0L
+        @Column(name = "pass", nullable = false) var pass: String = "",
+        @Column(name = "roles", nullable = false) var roles: String = ""
+) {
+    @ManyToOne
+    @JoinColumn(name = "account_id", nullable = false)
+    lateinit var account: Account
+    @Column(name = "account_id", insertable = false, updatable = false)
+    var accountId: Long = 0L
 
-    override fun getAuthorities(): MutableCollection<out GrantedAuthority> = arrayListOf()
-    override fun isEnabled(): Boolean = true
-    override fun getUsername(): String = email
-    override fun isCredentialsNonExpired(): Boolean = true
-    override fun getPassword(): String = pass
-    override fun isAccountNonExpired(): Boolean = true
-    override fun isAccountNonLocked(): Boolean = true
+    val securityRoles: List<String>
+        get() = roles
+                .split(",", ";", "|")
+                .filter { !it.isBlank() }
+                .map { String.format("ROLE_%s", it.toUpperCase().trim()) }
+                .toList()
 }
 
 
@@ -51,7 +55,7 @@ class Bank(
         @Column(name = "closing", nullable = false) var closing: LocalTime = LocalTime.MAX,
         @Column(name = "settlement_completion_target", nullable = false) var settlementCompletionTarget: LocalTime = LocalTime.NOON,
         @Column(name = "minimum_pay_in", nullable = false) var minimumPayIn: Position = Position.ZERO
-){
+) {
     override fun toString(): String = name
 }
 
@@ -73,11 +77,17 @@ class Currency(
         @Column(name = "closing", nullable = false) var closing: LocalTime = LocalTime.MAX,
         @Column(name = "funding_completion_target", nullable = false) var fundingCompletionTarget: LocalTime = LocalTime.NOON,
         @Column(name = "close", nullable = false) var close: LocalTime = LocalTime.MAX
-){
-    @ManyToOne @JoinColumn(name = "bank_id", nullable = false) lateinit var bank: Bank
-    @Column(name = "bank_id", insertable = false, updatable = false) var bankId: Long = 0L
-    @ManyToOne @JoinColumn(name = "currency_group_id", nullable = false) lateinit var currencyGroup: CurrencyGroup
-    @Column(name = "currency_group_id", insertable = false, updatable = false) var currencyGroupId: Long = 0L
+) {
+    @ManyToOne
+    @JoinColumn(name = "bank_id", nullable = false)
+    lateinit var bank: Bank
+    @Column(name = "bank_id", insertable = false, updatable = false)
+    var bankId: Long = 0L
+    @ManyToOne
+    @JoinColumn(name = "currency_group_id", nullable = false)
+    lateinit var currencyGroup: CurrencyGroup
+    @Column(name = "currency_group_id", insertable = false, updatable = false)
+    var currencyGroupId: Long = 0L
     override fun toString(): String = coin.toString()
 }
 
@@ -99,12 +109,15 @@ class Instruction(
         @Column(name = "counterparty", nullable = false) var counterparty: String = "",
         @Column(name = "reference", nullable = false) var reference: String = "",
         @Column(name = "amount", nullable = false) var amount: Position = Position.ZERO
-){
-    @ManyToOne @JoinColumn(name = "bank_id", nullable = false) lateinit var bank: Bank
-    @Column(name = "bank_id", insertable = false, updatable = false) var bankId: Long = 0L
+) {
+    @ManyToOne
+    @JoinColumn(name = "bank_id", nullable = false)
+    lateinit var bank: Bank
+    @Column(name = "bank_id", insertable = false, updatable = false)
+    var bankId: Long = 0L
 
     val partyNames: List<String>
-            get() = listOf(principal, counterparty)
+        get() = listOf(principal, counterparty)
 
     override fun toString(): String = "$type $principal $counterparty $amount"
 }

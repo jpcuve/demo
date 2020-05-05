@@ -16,6 +16,7 @@ import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
+import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
 import org.springframework.security.core.Authentication
@@ -56,7 +57,7 @@ class SecurityController(val facade: Facade, val keyManager: KeyManager, val pas
                 logger.debug("Login successful for: ${signInValue.email}")
                 val token = keyManager.buildToken(it)
                 logger.debug("Token: $token")
-                return ProfileValue(true, token, it.name, listOf())
+                return ProfileValue(true, token, it.name, it.securityRoles)
             }
         }
         throw CustomException("Invalid email / password")
@@ -93,7 +94,7 @@ class KeyManager(val key: SecretKey) {
     fun buildToken(user: User): String = Jwts
             .builder()
             .setSubject(user.email)
-            .claim("roles", "a,b,c")
+            .claim("roles", user.securityRoles.joinToString(",") )
             .signWith(key)
             .compact()
 
@@ -106,6 +107,7 @@ class KeyManager(val key: SecretKey) {
 
 
 @Configuration
+@EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter() {
     private val logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
     private val key = Keys.hmacShaKeyFor("my_secret_key_must_be_long_enough".toByteArray(StandardCharsets.UTF_8));
