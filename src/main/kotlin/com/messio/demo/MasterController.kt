@@ -41,13 +41,13 @@ class MasterController @Autowired constructor(
         val principal = req.userPrincipal.name
         logger.debug("Principal: $principal")
         facade.userRepository.findTopByEmail(principal)
-                ?.let { user ->
+                ?.let {
                     val currencyGroups = facade.currencyGroupRepository.findAll()
-                    val currencies = facade.currencyRepository.findByBank(user.account.bank)
+                    val currencies = facade.currencyRepository.findByBank(it.account.bank)
                     return mapOf(
-                            "profile" to ProfileValue(true, "", user.name, user.securityRoles),
-                            "account" to user.account,
-                            "bank" to user.account.bank,
+                            "profile" to ProfileValue(true, "", it.name, it.securityRoles),
+                            "account" to it.account,
+                            "bank" to it.account.bank,
                             "currencyGroups" to currencyGroups,
                             "currencies" to currencies
                     )
