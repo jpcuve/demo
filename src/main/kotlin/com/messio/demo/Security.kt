@@ -5,14 +5,10 @@ import io.jsonwebtoken.Jws
 import io.jsonwebtoken.JwtException
 import io.jsonwebtoken.Jwts
 import io.jsonwebtoken.security.Keys
-import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.http.HttpMethod
-import org.springframework.http.HttpStatus
-import org.springframework.http.ResponseEntity
 import org.springframework.security.authentication.AuthenticationManager
 import org.springframework.security.authentication.BadCredentialsException
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken
@@ -22,9 +18,7 @@ import org.springframework.security.config.annotation.web.configuration.WebSecur
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
-import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter
-import org.springframework.web.bind.annotation.*
 import java.nio.charset.StandardCharsets
 import java.security.SecureRandom
 import javax.crypto.SecretKey
@@ -34,67 +28,12 @@ import javax.servlet.http.HttpServletRequest
 const val SECURITY_WEB_CONTEXT = "/auth"
 const val AUTHORIZATION_PREFIX = "Bearer "
 
-@RestController
-@RequestMapping(SECURITY_WEB_CONTEXT)
-@CrossOrigin(allowCredentials = "true")
-class SecurityController(val facade: Facade, val keyManager: KeyManager, val passwordEncoder: PasswordEncoder) {
-    private val logger: Logger = LoggerFactory.getLogger(SecurityController::class.java)
-
-    @GetMapping()
-    fun apiRoot(): Map<String, String> {
-        return mapOf("ok" to "status")
-    }
-
-    @GetMapping("/error")
-    fun apiError(): ResponseEntity<HttpStatus> {
-        return ResponseEntity(HttpStatus.BAD_REQUEST)
-    }
-
-    @PostMapping("/sign-in")
-    fun apiSignIn(@RequestBody signInValue: SignInValue, @Autowired req: HttpServletRequest): ProfileValue {
-        facade.userRepository.findTopByEmail(signInValue.email)?.let {
-            if (passwordEncoder.matches(signInValue.password, it.pass)){
-                logger.debug("Login successful for: ${signInValue.email}")
-                val token = keyManager.buildToken(it)
-                logger.debug("Token: $token")
-                return ProfileValue(true, token, it.name, it.securityRoles)
-            }
-        }
-        throw CustomException("Invalid email / password")
-    }
-
-    @GetMapping("/sign-out")
-    fun apiSignOut(): ProfileValue {
-        return ProfileValue()
-    }
-
-    @PostMapping("/sign-up")
-    fun apiSignUp(@RequestBody signUpValue: SignUpValue): String {
-        return "ok"
-    }
-
-    @PostMapping("/update-password")
-    fun apiUpdatePassword(@RequestBody updatePasswordValue: UpdatePasswordValue): String {
-        return "ok"
-    }
-
-    @PostMapping("/reset-password")
-    fun apiResetPassword(@RequestBody resetPasswordValue: ResetPasswordValue): String {
-        return "ok"
-    }
-
-    @PostMapping("/google-sign-in")
-    fun apiGoogleSignIn(@RequestBody googleSignInValue: GoogleSignInValue): String {
-        return "ok"
-    }
-}
-
 class KeyManager(val key: SecretKey) {
 
     fun buildToken(user: User): String = Jwts
             .builder()
             .setSubject(user.email)
-            .claim("roles", user.securityRoles.joinToString(",") )
+            .claim("roles", user.securityRoles.joinToString(","))
             .signWith(key)
             .compact()
 
