@@ -3,8 +3,10 @@ package com.messio.demo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
+import org.springframework.security.core.context.SecurityContext
 import org.springframework.web.bind.annotation.*
 import javax.annotation.security.RolesAllowed
+import javax.servlet.http.HttpServletRequest
 
 @RestController
 @RequestMapping("/master")
@@ -32,6 +34,25 @@ class MasterController @Autowired constructor(
                             .toList()
                 }
                 ?: emptyList()
+    }
+
+    @GetMapping("/static")
+    fun apiStatic(@Autowired req: HttpServletRequest): Map<String, Any>{
+        val principal = req.userPrincipal.name
+        logger.debug("Principal: $principal")
+        facade.userRepository.findTopByEmail(principal)
+                ?.let { user ->
+                    val currencyGroups = facade.currencyGroupRepository.findAll()
+                    val currencies = facade.currencyRepository.findByBank(user.account.bank)
+                    return mapOf(
+                            "profile" to ProfileValue(true, "", user.name, user.securityRoles),
+                            "account" to user.account,
+                            "bank" to user.account.bank,
+                            "currencyGroups" to currencyGroups,
+                            "currencies" to currencies
+                    )
+                }
+        throw CustomException("User not found: $principal")
     }
 
     @GetMapping("/all-banks")

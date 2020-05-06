@@ -26,21 +26,21 @@ class SecurityController(val facade: Facade, val keyManager: KeyManager, val pas
     }
 
     @PostMapping("/sign-in")
-    fun apiSignIn(@RequestBody signInValue: SignInValue, @Autowired req: HttpServletRequest): ProfileValue {
+    fun apiSignIn(@RequestBody signInValue: SignInValue, @Autowired req: HttpServletRequest): TokenValue {
         facade.userRepository.findTopByEmail(signInValue.email)?.let {
             if (passwordEncoder.matches(signInValue.password, it.pass)){
                 logger.debug("Login successful for: ${signInValue.email}")
                 val token = keyManager.buildToken(it)
                 logger.debug("Token: $token")
-                return ProfileValue(true, token, it.name, it.securityRoles)
+                return TokenValue(token)
             }
         }
         throw CustomException("Invalid email / password")
     }
 
     @GetMapping("/sign-out")
-    fun apiSignOut(): ProfileValue {
-        return ProfileValue()
+    fun apiSignOut(): TokenValue {
+        return TokenValue()
     }
 
     @PostMapping("/sign-up")

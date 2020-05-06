@@ -6,6 +6,7 @@ import javax.persistence.*
 
 @Entity
 @Table(name = "accounts", uniqueConstraints = [UniqueConstraint(columnNames = ["name", "bank_id"])])
+@JsonIgnoreProperties("bank")
 class Account(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
         @Column(name = "name", nullable = false) var name: String = "",
@@ -24,6 +25,7 @@ class Account(
 
 @Entity
 @Table(name = "users")
+@JsonIgnoreProperties("account")
 class User(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
         @Column(name = "email", nullable = false, unique = true) var email: String = "",

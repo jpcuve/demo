@@ -6,3 +6,4 @@ data class SignUpValue(val email: String = "", val password: String = "", val na
 data class UpdatePasswordValue(val newPassword: String = "", val newPasswordConfirmation: String = "", val token: String = "")
 data class ResetPasswordValue(val email: String = "")
 data class ProfileValue(val identified: Boolean = false, val token: String = "", val name: String = "", val roles: List<String> = listOf())
+data class TokenValue(val token: String = "")
