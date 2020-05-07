@@ -45,9 +45,8 @@ class BuildOneModel(val facade: Facade) : BankModel() {
             logger.debug("Count of instructions settled: $settledCount")
         } while (settledCount.get() > 0)
         logger.debug("Generating pay-outs")
-/*
-        val mirror = facade.accountRepository.findTopByNameAndByBank(MIRROR_NAME, bank)
-        mirror?.let {
+        val mirror = facade.accountRepository.findByBank(bank).first { it.name == MIRROR_NAME }
+        mirror.let {
             balance
                     .filter { it.key.name != MIRROR_NAME }
                     .forEach { e ->
@@ -65,6 +64,5 @@ class BuildOneModel(val facade: Facade) : BankModel() {
                                 }
                     }
         }
-*/
     }
 }
