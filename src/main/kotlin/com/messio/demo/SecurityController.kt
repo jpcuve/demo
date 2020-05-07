@@ -48,14 +48,22 @@ class SecurityController(val facade: Facade, val keyManager: KeyManager, val pas
         facade.userRepository.findTopByEmail(signUpValue.email)?.let {
             throw CustomException("User ${signUpValue.email} already exists")
         }
-        val user = User(
-                email = signUpValue.email,
-                name = signUpValue.name,
-                pass = passwordEncoder.encode(signUpValue.password)
-        )
-        facade.userRepository.save(user)
-        logger.debug("User created: ${user.email}")
-        return mapOf("status" to "ok")
+        facade.bankRepository.findByName("DEFAULT")?.let {
+            val account = Account(name = signUpValue.name)
+            account.bank = it
+            facade.accountRepository.save(account)
+            logger.debug("Account created: ${account.name}")
+            val user = User(
+                    email = signUpValue.email,
+                    name = signUpValue.name,
+                    pass = passwordEncoder.encode(signUpValue.password)
+            )
+            user.account = account
+            facade.userRepository.save(user)
+            logger.debug("User created: ${user.email}")
+            return mapOf("status" to "ok")
+        }
+        throw CustomException("Sign-up failed")
     }
 
     @PostMapping("/update-password")

@@ -70,7 +70,7 @@ class CurrencyGroup(
 )
 
 @Entity
-@Table(name = "currencies", uniqueConstraints = [UniqueConstraint(columnNames = ["coin"])])
+@Table(name = "currencies", uniqueConstraints = [UniqueConstraint(columnNames = ["bank_id", "coin"])])
 @JsonIgnoreProperties("bank", "currencyGroup")
 class Currency(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,

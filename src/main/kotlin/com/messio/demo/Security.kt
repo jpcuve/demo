@@ -53,13 +53,13 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
 
     override fun configure(http: HttpSecurity) {
         http
-                .csrf().disable()
+                .csrf().disable() // not for production
+                .headers().frameOptions().disable().and()  // not for production, necessary for H2 console
                 .addFilter(preAuthTokenHeaderFilter())
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
                 .antMatchers("$SECURITY_WEB_CONTEXT/**").permitAll()
-                .antMatchers("/test-error").permitAll()
                 .anyRequest().authenticated()
     }
 
