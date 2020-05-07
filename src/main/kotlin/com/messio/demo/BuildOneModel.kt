@@ -2,12 +2,14 @@ package com.messio.demo
 
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.mail.SimpleMailMessage
+import org.springframework.mail.javamail.JavaMailSender
 import org.springframework.stereotype.Component
 import java.time.LocalTime
 import java.util.concurrent.atomic.AtomicInteger
 
 @Component
-class BuildOneModel(val facade: Facade) : BankModel() {
+class BuildOneModel(val facade: Facade, val javaMailSender: JavaMailSender) : BankModel() {
     private val logger: Logger = LoggerFactory.getLogger(BuildOneModel::class.java)
 
     override fun currencyClosing(time: LocalTime, currency: Currency) {
@@ -64,5 +66,13 @@ class BuildOneModel(val facade: Facade) : BankModel() {
                                 }
                     }
         }
+    }
+
+    override fun doneDay(time: LocalTime) {
+        val message = SimpleMailMessage()
+        message.setTo("jean-pierre.cuvelliez@skynet.be")
+        message.setSubject("Settlement day finished")
+        message.setText("It really is finished")
+        javaMailSender.send(message)
     }
 }
