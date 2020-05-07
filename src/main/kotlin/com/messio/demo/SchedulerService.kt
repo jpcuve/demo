@@ -10,15 +10,13 @@ import java.util.*
 @Service
 class SchedulerService @Autowired constructor(val publisher: ApplicationEventPublisher) {
     private val logger = LoggerFactory.getLogger(SchedulerService::class.java)
-    private val events: SortedMap<LocalTime, BaseEvent> = TreeMap()
+    private val events: SortedMap<LocalTime, MutableList<BaseEvent>> = TreeMap()
 
     fun enter(event: BaseEvent) {
-        events[event.instant] = event
+        events.getOrPut(event.instant, { ArrayList() }).add(event)
     }
 
     fun run(blocking: Boolean = true){
-        events.values.forEach {
-            publisher.publishEvent(it)
-        }
+        events.values.forEach { it.forEach { e -> publisher.publishEvent(e) } }
     }
 }

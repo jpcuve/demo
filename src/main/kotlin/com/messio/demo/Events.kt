@@ -1,5 +1,7 @@
 package com.messio.demo
 
+import org.slf4j.Logger
+import org.slf4j.LoggerFactory
 import org.springframework.context.ApplicationEvent
 import org.springframework.context.ApplicationListener
 import java.time.LocalTime
@@ -12,7 +14,11 @@ class CurrencyEvent(source: Any, instant: LocalTime, name: String, val currency:
 
 class InstructionEvent(source: Any, instant: LocalTime, name: String, val instruction: Instruction): BaseEvent(source, instant, name)
 
-abstract class BankModel: ApplicationListener<BaseEvent> {
+open class BankModel: ApplicationListener<BaseEvent> {
+    companion object{
+        val logger: Logger = LoggerFactory.getLogger(BankModel::class.java)
+    }
+
     override fun onApplicationEvent(event: BaseEvent) {
         when (event){
             is CurrencyEvent -> when(event.name){
@@ -27,19 +33,19 @@ abstract class BankModel: ApplicationListener<BaseEvent> {
                 "closing" -> bankClosing(event.instant, event.bank)
             }
             else -> when(event.name){
-                "opening" -> initDay()
-                "closing" -> doneDay()
+                "opening" -> initDay(event.instant)
+                "closing" -> doneDay(event.instant)
             }
         }
     }
 
-    abstract fun initDay()
-    abstract fun bankOpening(time: LocalTime, bank: Bank)
-    abstract fun currencyOpening(time: LocalTime, currency: Currency)
-    abstract fun currencyFundingCompletionTarget(time: LocalTime, currency: Currency)
-    abstract fun currencyClosing(time: LocalTime, currency: Currency)
-    abstract fun currencyClose(time: LocalTime, currency: Currency)
-    abstract fun settlementCompletionTarget(time: LocalTime, bank: Bank)
-    abstract fun bankClosing(time: LocalTime, bank: Bank)
-    abstract fun doneDay()
+    open fun initDay(time: LocalTime) = logger.debug("$time, start of day")
+    open fun bankOpening(time: LocalTime, bank: Bank) = logger.debug("$time, opening of bank '$bank'")
+    open fun currencyOpening(time: LocalTime, currency: Currency) = logger.debug("$time, opening of curreny '$currency' for bank '${currency.bank}'")
+    open fun currencyFundingCompletionTarget(time: LocalTime, currency: Currency) = logger.debug("$time, funding completion target of curreny '$currency' for bank '${currency.bank}'")
+    open fun currencyClosing(time: LocalTime, currency: Currency) = logger.debug("$time, closing of curreny '$currency' for bank '${currency.bank}'")
+    open fun currencyClose(time: LocalTime, currency: Currency) = logger.debug("$time, close of curreny '$currency' for bank '${currency.bank}'")
+    open fun settlementCompletionTarget(time: LocalTime, bank: Bank) = logger.debug("$time, settlement completion target of bank '$bank'")
+    open fun bankClosing(time: LocalTime, bank: Bank) = logger.debug("$time, closing of bank '$bank'")
+    open fun doneDay(time: LocalTime) = logger.debug("$time, end of day")
 }

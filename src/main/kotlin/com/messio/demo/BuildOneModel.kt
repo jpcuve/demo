@@ -11,30 +11,12 @@ import java.util.concurrent.atomic.AtomicInteger
 class BuildOneModel(val facade: Facade) : BankModel() {
     private val logger: Logger = LoggerFactory.getLogger(BuildOneModel::class.java)
 
-    override fun initDay() {
-    }
-
-    override fun bankOpening(time: LocalTime, bank: Bank) {
-    }
-
-    override fun currencyOpening(time: LocalTime, currency: Currency) {
-    }
-
-    override fun currencyFundingCompletionTarget(time: LocalTime, currency: Currency) {
-    }
-
     override fun currencyClosing(time: LocalTime, currency: Currency) {
+        logger.debug("Closing currency: ${currency.coin}")
         facade.instructionRepository
                 .findAllByBankAndTypeAndBookedIsNull(currency.bank, InstructionType.PAY_OUT)
-                .filter {
-                    !it.moment.isAfter(time) && it.amount.containsKey(currency.coin)
-                }
-                .forEach {
-                    facade.book(it, time)
-                }
-    }
-
-    override fun currencyClose(time: LocalTime, currency: Currency) {
+                .filter { !it.moment.isAfter(time) && it.amount.containsKey(currency.coin) }
+                .forEach { facade.book(it, time) }
     }
 
     override fun settlementCompletionTarget(time: LocalTime, bank: Bank) {
@@ -42,10 +24,9 @@ class BuildOneModel(val facade: Facade) : BankModel() {
         val balance = Balance()
         facade.instructionRepository
                 .findAllByBankAndTypeAndBookedIsNull(bank, InstructionType.PAY_IN)
-                .filter {
-                    !it.moment.isAfter(time)
-                }
+                .filter { !it.moment.isAfter(time) }
                 .forEach {
+                    logger.debug("Booking: $it")
                     facade.book(it, time)
                     balance.transfer(it.principal, it.counterparty, it.amount)
                 }
@@ -56,9 +37,7 @@ class BuildOneModel(val facade: Facade) : BankModel() {
             // simplest stuff, run once and only allow if sufficient provision on account
             facade.instructionRepository
                     .findAllByBankAndTypeAndBookedIsNull(bank, InstructionType.SETTLEMENT)
-                    .filter {
-                        !it.moment.isAfter(time) && balance.isProvisioned(it.principal, it.amount)
-                    }
+                    .filter { !it.moment.isAfter(time) && balance.isProvisioned(it.principal, it.amount) }
                     .forEach {
                         facade.book(it, time)
                         balance.transfer(it.principal, it.counterparty, it.amount)
@@ -84,11 +63,5 @@ class BuildOneModel(val facade: Facade) : BankModel() {
                                 facade.instructionRepository.save(payout)
                             }
                 }
-    }
-
-    override fun bankClosing(time: LocalTime, bank: Bank) {
-    }
-
-    override fun doneDay() {
     }
 }
