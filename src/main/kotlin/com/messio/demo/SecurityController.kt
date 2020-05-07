@@ -48,7 +48,7 @@ class SecurityController(val facade: Facade, val keyManager: KeyManager, val pas
         facade.userRepository.findTopByEmail(signUpValue.email)?.let {
             throw CustomException("User ${signUpValue.email} already exists")
         }
-        facade.bankRepository.findByName("DEFAULT")?.let {
+        facade.bankRepository.findTopByName("DEFAULT")?.let {
             val account = Account(name = signUpValue.name)
             account.bank = it
             facade.accountRepository.save(account)

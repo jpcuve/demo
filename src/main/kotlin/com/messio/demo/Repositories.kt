@@ -31,11 +31,13 @@ class Facade(
 
 @Repository
 interface BankRepository : CrudRepository<Bank, Long> {
-    fun findByName(name: String): Bank?
+    fun findTopByName(name: String): Bank?
 }
 
 @Repository
-interface AccountRepository : CrudRepository<Account, Long>
+interface AccountRepository : CrudRepository<Account, Long> {
+    fun findByBank(bank: Bank): Iterable<Account>
+}
 
 @Repository
 interface UserRepository : CrudRepository<User, Long> {
@@ -44,7 +46,6 @@ interface UserRepository : CrudRepository<User, Long> {
 
 @Repository
 interface CurrencyGroupRepository : CrudRepository<CurrencyGroup, Long> {
-    fun findAllByOrderByPriority(): Iterable<CurrencyGroup>
 }
 
 @Repository
@@ -54,9 +55,11 @@ interface CurrencyRepository : CrudRepository<Currency, Long> {
 
 @Repository
 interface InstructionRepository : CrudRepository<Instruction, Long> {
-    fun findAllByBank(bank: Bank): Iterable<Instruction>
-    fun findAllByBankAndTypeAndBookedIsNull(bank: Bank, type: InstructionType): Iterable<Instruction>
-    fun findAllByBankAndTypeAndBookedIsNotNull(bank: Bank, type: InstructionType): Iterable<Instruction>
+    fun findByPrincipalBank(bank: Bank): Iterable<Instruction>
+    fun findByCounterpartyBank(bank: Bank): Iterable<Instruction>
+
+    @Query("select i from Instruction i where i.principal.bank = ?1 or i.counterparty.bank = ?1")
+    fun findByBank(bank: Bank): Iterable<Instruction>
 
     @Query("select max(i.bookId) from Instruction i")
     fun findMaxBookId(): Long?

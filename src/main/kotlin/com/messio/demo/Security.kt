@@ -66,19 +66,8 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
     @Bean
     fun preAuthTokenHeaderFilter(): Filter {
         val filter = object : AbstractPreAuthenticatedProcessingFilter() {
-            override fun getPreAuthenticatedPrincipal(request: HttpServletRequest): Any? {
-                logger.debug("Request: ${request.method} ${request.requestURI}")
-                for (name in request.headerNames) {
-                    logger.debug(" Header: $name=${request.getHeader(name)}")
-                }
-                val header = request.getHeader("Authorization")
-                logger.debug("Authorization: $header")
-                return header
-            }
-
-            override fun getPreAuthenticatedCredentials(request: HttpServletRequest): Any {
-                return "N/A"
-            }
+            override fun getPreAuthenticatedPrincipal(request: HttpServletRequest): Any? = request.getHeader("Authorization")
+            override fun getPreAuthenticatedCredentials(request: HttpServletRequest): Any = "N/A"
         }
         filter.setAuthenticationManager(authenticationManager())
         return filter

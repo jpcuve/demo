@@ -19,8 +19,8 @@ insert into accounts(id, bank_id, name, short_position_limit) values
 (5, 2, 'c', '{}');
 insert into users(id, account_id, email, name, pass, roles) values
 (1, 2, 'jpcuvelliez@gmail.com', 'Jean-Pierre Cuvelliez', '$2a$10$4HTiaVNaqfe5dlMnWRE1o.nnop29Qu6xKxz8H5HOeJkXxJrS.0u4K', 'DEVELOPER');
-insert into instructions(id, bank_id, moment, instruction_type, principal, counterparty, reference, amount) values
-(1, 2, '08:00', 'PAY', 'a', 'b', 'TEST', '{}'),
-(2, 2, '09:30', 'SETTLEMENT', 'b', 'a', 'Settlement 1', '{EUR=70,USD=90}'),
-(3, 2, '09:30', 'SETTLEMENT', 'a', 'b', 'Settlement 2', '{EUR=80,USD=100}'),
-(4, 2, '09:30', 'PAY_IN', '__MIRROR__', 'a', 'Pay-in 1', '{EUR=100,USD=200}');
+insert into instructions(id, principal_id, counterparty_id, moment, instruction_type, reference, amount) values
+(1, 3, 4, '08:00', 'PAY', 'TEST', '{}'),
+(2, 4, 3, '09:30', 'SETTLEMENT', 'Settlement 1', '{EUR=70,USD=90}'),
+(3, 3, 4, '09:30', 'SETTLEMENT', 'Settlement 2', '{EUR=80,USD=100}'),
+(4, 2, 3, '09:30', 'PAY_IN', 'Pay-in 1', '{EUR=100,USD=200}');

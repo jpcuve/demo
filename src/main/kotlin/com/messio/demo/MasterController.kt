@@ -18,8 +18,8 @@ class MasterController @Autowired constructor(val facade: Facade) {
     @GetMapping("/statement")
     fun apiStatement(@Autowired req: HttpServletRequest): List<Instruction> {
         facade.userRepository.findTopByEmail(req.userPrincipal.name)?.let {
-            return facade.instructionRepository.findAllByBank(it.account.bank)
-                    .filter { i -> i.booked != null && (i.partyNames.contains(it.account.name)) }
+            return facade.instructionRepository.findByBank(it.account.bank)
+                    .filter { i -> i.booked != null && (i.partyIds.contains(it.account.id)) }
                     .sortedBy { i -> i.bookId ?: 0L }
                     .toList()
         }

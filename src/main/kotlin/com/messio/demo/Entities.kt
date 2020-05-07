@@ -4,6 +4,8 @@ import com.fasterxml.jackson.annotation.JsonIgnoreProperties
 import java.time.LocalTime
 import javax.persistence.*
 
+const val MIRROR_NAME = "__MIRROR__"
+
 @Entity
 @Table(name = "accounts", uniqueConstraints = [UniqueConstraint(columnNames = ["name", "bank_id"])])
 @JsonIgnoreProperties("bank")
@@ -11,15 +13,19 @@ class Account(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
         @Column(name = "name", nullable = false) var name: String = "",
         @Column(name = "short_position_limit", nullable = false) var shortPositionLimit: Position = Position.ZERO
-) {
+) : Comparable<Account>{
     @ManyToOne
     @JoinColumn(name = "bank_id", nullable = false)
     lateinit var bank: Bank
     @Column(name = "bank_id", insertable = false, updatable = false)
     var bankId: Long = 0L
 
-    companion object {
-        val MIRROR_NAME = "__MIRROR__"
+    override fun compareTo(other: Account): Int {
+        return (id - other.id).toInt()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return other is Account && other.id == id
     }
 }
 
@@ -100,26 +106,29 @@ enum class InstructionType {
 @Entity
 @Table(name = "instructions")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@JsonIgnoreProperties("bank")
+@JsonIgnoreProperties("principal", "counterparty")
 class Instruction(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0,
         @Column(name = "moment", nullable = false) var moment: LocalTime = LocalTime.MIN,
         @Column(name = "book_id", nullable = true) var bookId: Long? = null,
         @Column(name = "booked", nullable = true) var booked: LocalTime? = null,
         @Enumerated(EnumType.STRING) @Column(name = "instruction_type", nullable = false) var type: InstructionType = InstructionType.PAY,
-        @Column(name = "principal", nullable = false) var principal: String = "",
-        @Column(name = "counterparty", nullable = false) var counterparty: String = "",
         @Column(name = "reference", nullable = false) var reference: String = "",
         @Column(name = "amount", nullable = false) var amount: Position = Position.ZERO
 ) {
     @ManyToOne
-    @JoinColumn(name = "bank_id", nullable = false)
-    lateinit var bank: Bank
-    @Column(name = "bank_id", insertable = false, updatable = false)
-    var bankId: Long = 0L
+    @JoinColumn(name = "principal_id", nullable = false)
+    lateinit var principal: Account
+    @Column(name = "principal_id", insertable = false, updatable = false)
+    var principalId: Long = 0L
+    @ManyToOne
+    @JoinColumn(name = "counterparty_id", nullable = false)
+    lateinit var counterparty: Account
+    @Column(name = "counterparty_id", insertable = false, updatable = false)
+    var counterpartyId: Long = 0L
 
-    val partyNames: List<String>
-        get() = listOf(principal, counterparty)
+    val partyIds: List<Long>
+        get() = listOf(principalId, counterpartyId)
 
-    override fun toString(): String = "$type $principal $counterparty $amount"
+    override fun toString(): String = "$type ${principal.name} ${counterparty.name} $amount"
 }
