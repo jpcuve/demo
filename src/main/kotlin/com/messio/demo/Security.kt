@@ -47,10 +47,9 @@ class KeyManager(val key: SecretKey) {
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
-class SecurityConfiguration(val facade: Facade) : WebSecurityConfigurerAdapter() {
+class SecurityConfiguration : WebSecurityConfigurerAdapter() {
     private val logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
     private val key = Keys.hmacShaKeyFor("my_secret_key_must_be_long_enough".toByteArray(StandardCharsets.UTF_8));
-    // private val key = Keys.secretKeyFor(SignatureAlgorithm.HS256)
 
     override fun configure(http: HttpSecurity) {
         http

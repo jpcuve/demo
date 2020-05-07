@@ -44,8 +44,18 @@ class SecurityController(val facade: Facade, val keyManager: KeyManager, val pas
     }
 
     @PostMapping("/sign-up")
-    fun apiSignUp(@RequestBody signUpValue: SignUpValue): String {
-        return "ok"
+    fun apiSignUp(@RequestBody signUpValue: SignUpValue): Map<String, String> {
+        facade.userRepository.findTopByEmail(signUpValue.email)?.let {
+            throw CustomException("User ${signUpValue.email} already exists")
+        }
+        val user = User(
+                email = signUpValue.email,
+                name = signUpValue.name,
+                pass = passwordEncoder.encode(signUpValue.password)
+        )
+        facade.userRepository.save(user)
+        logger.debug("User created: ${user.email}")
+        return mapOf("status" to "ok")
     }
 
     @PostMapping("/update-password")

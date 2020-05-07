@@ -3,7 +3,6 @@ package com.messio.demo
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
-import org.springframework.security.core.context.SecurityContext
 import org.springframework.web.bind.annotation.*
 import javax.annotation.security.RolesAllowed
 import javax.servlet.http.HttpServletRequest
@@ -37,7 +36,7 @@ class MasterController @Autowired constructor(
     }
 
     @GetMapping("/static")
-    fun apiStatic(@Autowired req: HttpServletRequest): Map<String, Any>{
+    fun apiStatic(@Autowired req: HttpServletRequest): Map<String, Any> {
         val principal = req.userPrincipal.name
         logger.debug("Principal: $principal")
         facade.userRepository.findTopByEmail(principal)
