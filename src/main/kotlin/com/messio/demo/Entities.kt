@@ -34,6 +34,7 @@ class Account(
 @JsonIgnoreProperties("account")
 class User(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
+        @Column(name = "google_id", unique = true) var googleId: String? = null,
         @Column(name = "email", nullable = false, unique = true) var email: String = "",
         @Column(name = "name", nullable = false) var name: String = "",
         @Column(name = "pass", nullable = false) var pass: String = "",

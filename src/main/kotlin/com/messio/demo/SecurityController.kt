@@ -1,7 +1,12 @@
 package com.messio.demo
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
+import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.http.javanet.NetHttpTransport
+import com.google.api.client.json.jackson2.JacksonFactory
+import io.jsonwebtoken.Claims
+import io.jsonwebtoken.Jws
+import io.jsonwebtoken.Jwts
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -43,18 +48,22 @@ class SecurityController(val facade: Facade, val keyManager: KeyManager, val pas
     @PostMapping("/social-sign-in")
     fun apiSocialSignIn(@RequestBody socialSignInValue: SocialSignInValue): TokenValue {
         logger.debug("Social sign-in: $socialSignInValue")
-/*
-        val transport = NetHttpTransport.getDefaultInstance()
-        val verifier = GoogleIdTokenVerifier.Builder(transport, )
-                .setAudience()
+        val transport = GoogleNetHttpTransport.newTrustedTransport()
+        val jsonFactory = JacksonFactory.getDefaultInstance()
+        val verifier = GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+                .setAudience(listOf("784351879169-fbhd369t9dvnueu1nhm3lom2h6tlu2pu.apps.googleusercontent.com"))
                 .build()
-        val idToken = verifier.verify(socialSignInValue.identity)
-        idToken?.let {
-            val payload = idToken.getPayload()
-            val userId = payload.getSubject()
-            logger.debug("Google user id: $userId")
+        verifier.verify(socialSignInValue.identity)?.let {
+            val payload = it.payload
+            val userId = payload.subject
+            logger.debug("Google user id: $userId") // must be used for user detection
+            facade.userRepository.findTopByGoogleId(userId)?.let {
+                logger.debug("Login successful for: ${payload.email}")
+                val token = keyManager.buildToken(it)
+                logger.debug("Token: $token")
+                return TokenValue(token)
+            }
         }
-*/
         throw CustomException("Invalid token")
     }
 
