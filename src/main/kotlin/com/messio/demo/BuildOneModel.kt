@@ -73,6 +73,6 @@ class BuildOneModel(val facade: Facade, val javaMailSender: JavaMailSender) : Ba
         message.setTo("jean-pierre.cuvelliez@skynet.be")
         message.setSubject("Settlement day finished")
         message.setText("It really is finished")
-        javaMailSender.send(message)
+        // javaMailSender.send(message)
     }
 }

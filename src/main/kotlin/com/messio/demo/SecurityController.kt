@@ -1,5 +1,7 @@
 package com.messio.demo
 
+import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
+import com.google.api.client.http.javanet.NetHttpTransport
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
@@ -36,6 +38,24 @@ class SecurityController(val facade: Facade, val keyManager: KeyManager, val pas
             }
         }
         throw CustomException("Invalid email / password")
+    }
+
+    @PostMapping("/social-sign-in")
+    fun apiSocialSignIn(@RequestBody socialSignInValue: SocialSignInValue): TokenValue {
+        logger.debug("Social sign-in: $socialSignInValue")
+/*
+        val transport = NetHttpTransport.getDefaultInstance()
+        val verifier = GoogleIdTokenVerifier.Builder(transport, )
+                .setAudience()
+                .build()
+        val idToken = verifier.verify(socialSignInValue.identity)
+        idToken?.let {
+            val payload = idToken.getPayload()
+            val userId = payload.getSubject()
+            logger.debug("Google user id: $userId")
+        }
+*/
+        throw CustomException("Invalid token")
     }
 
     @GetMapping("/sign-out")
