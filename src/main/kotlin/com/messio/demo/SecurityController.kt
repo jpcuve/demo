@@ -48,20 +48,24 @@ class SecurityController(val facade: Facade, val keyManager: KeyManager, val pas
     @PostMapping("/social-sign-in")
     fun apiSocialSignIn(@RequestBody socialSignInValue: SocialSignInValue): TokenValue {
         logger.debug("Social sign-in: $socialSignInValue")
-        val transport = GoogleNetHttpTransport.newTrustedTransport()
-        val jsonFactory = JacksonFactory.getDefaultInstance()
-        val verifier = GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-                .setAudience(listOf("784351879169-fbhd369t9dvnueu1nhm3lom2h6tlu2pu.apps.googleusercontent.com"))
-                .build()
-        verifier.verify(socialSignInValue.identity)?.let {
-            val payload = it.payload
-            val userId = payload.subject
-            logger.debug("Google user id: $userId") // must be used for user detection
-            facade.userRepository.findTopByGoogleId(userId)?.let {
-                logger.debug("Login successful for: ${payload.email}")
-                val token = keyManager.buildToken(it)
-                logger.debug("Token: $token")
-                return TokenValue(token)
+        when(socialSignInValue.social){
+            "google" -> {
+                val transport = GoogleNetHttpTransport.newTrustedTransport()
+                val jsonFactory = JacksonFactory.getDefaultInstance()
+                val verifier = GoogleIdTokenVerifier.Builder(transport, jsonFactory)
+                        .setAudience(listOf("784351879169-fbhd369t9dvnueu1nhm3lom2h6tlu2pu.apps.googleusercontent.com"))
+                        .build()
+                verifier.verify(socialSignInValue.identity)?.let {
+                    val payload = it.payload
+                    val userId = payload.subject
+                    logger.debug("Google user id: $userId") // must be used for user detection
+                    facade.userRepository.findTopByGoogleId(userId)?.let {
+                        logger.debug("Login successful for: ${payload.email}")
+                        val token = keyManager.buildToken(it)
+                        logger.debug("Token: $token")
+                        return TokenValue(token)
+                    }
+                }
             }
         }
         throw CustomException("Invalid token")
