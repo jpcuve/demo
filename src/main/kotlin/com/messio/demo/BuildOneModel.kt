@@ -29,7 +29,7 @@ class BuildOneModel(val facade: Facade, val javaMailSender: JavaMailSender) : Ba
                 .forEach {
                     logger.debug("Booking: $it")
                     facade.book(it, time)
-                    balance.transfer(it.principal, it.counterparty, it.amount)
+                    balance.transfer(it.db, it.cr, it.amount)
                 }
         logger.debug("Settling sequentially")
         val settledCount = AtomicInteger()
@@ -38,10 +38,10 @@ class BuildOneModel(val facade: Facade, val javaMailSender: JavaMailSender) : Ba
             // simplest stuff, run once and only allow if sufficient provision on account
             facade.instructionRepository
                     .findByBank(bank)
-                    .filter { !it.moment.isAfter(time) && it.type == InstructionType.SETTLEMENT && it.booked == null && balance.isProvisioned(it.principal, it.amount) }
+                    .filter { !it.moment.isAfter(time) && it.type == InstructionType.SETTLEMENT && it.booked == null && balance.isProvisioned(it.db, it.amount) }
                     .forEach {
                         facade.book(it, time)
-                        balance.transfer(it.principal, it.counterparty, it.amount)
+                        balance.transfer(it.db, it.cr, it.amount)
                         settledCount.incrementAndGet()
                     }
             logger.debug("Count of instructions settled: $settledCount")
@@ -57,10 +57,11 @@ class BuildOneModel(val facade: Facade, val javaMailSender: JavaMailSender) : Ba
                                     val payout = Instruction(
                                             moment = time,
                                             type = InstructionType.PAY_OUT,
-                                            amount = Position(it)
+                                            amount = Position(it),
+                                            reference = "Pay-out ${it.key} to ${e.key.name}"
                                     )
-                                    payout.principal = mirror
-                                    payout.counterparty = e.key
+                                    payout.db = e.key
+                                    payout.cr = mirror
                                     logger.debug("Creating pay-out: $payout")
                                     facade.instructionRepository.save(payout)
                                 }

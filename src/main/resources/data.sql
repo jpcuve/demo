@@ -19,7 +19,7 @@ insert into accounts(id, bank_id, name, short_position_limit) values
 (5, 2, 'c', '{}');
 insert into users(id, account_id, google_id, email, name, pass, roles) values
 (1, 2, '105641528252167272810', 'jpcuvelliez@gmail.com', 'Jean-Pierre Cuvelliez', '$2a$10$4HTiaVNaqfe5dlMnWRE1o.nnop29Qu6xKxz8H5HOeJkXxJrS.0u4K', 'DEVELOPER');
-insert into instructions(id, principal_id, counterparty_id, moment, instruction_type, reference, amount) values
+insert into instructions(id, db_id, cr_id, moment, instruction_type, reference, amount) values
 (1, 3, 4, '08:00', 'PAY', 'TEST', '{}'),
 (2, 4, 3, '09:30', 'SETTLEMENT', 'Settlement 1', '{EUR=70,USD=90}'),
 (3, 3, 4, '09:30', 'SETTLEMENT', 'Settlement 2', '{EUR=80,USD=100}'),

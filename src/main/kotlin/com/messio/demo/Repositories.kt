@@ -56,10 +56,10 @@ interface CurrencyRepository : CrudRepository<Currency, Long> {
 
 @Repository
 interface InstructionRepository : CrudRepository<Instruction, Long> {
-    fun findByPrincipalBank(bank: Bank): Iterable<Instruction>
-    fun findByCounterpartyBank(bank: Bank): Iterable<Instruction>
+    fun findByDbBank(bank: Bank): Iterable<Instruction>
+    fun findByCrBank(bank: Bank): Iterable<Instruction>
 
-    @Query("select i from Instruction i where i.principal.bank = ?1 or i.counterparty.bank = ?1")
+    @Query("select i from Instruction i where i.db.bank = ?1 or i.cr.bank = ?1")
     fun findByBank(bank: Bank): Iterable<Instruction>
 
     @Query("select max(i.bookId) from Instruction i")

@@ -107,7 +107,7 @@ enum class InstructionType {
 @Entity
 @Table(name = "instructions")
 @Inheritance(strategy = InheritanceType.SINGLE_TABLE)
-@JsonIgnoreProperties("principal", "counterparty")
+@JsonIgnoreProperties("db", "cr")
 class Instruction(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0,
         @Column(name = "moment", nullable = false) var moment: LocalTime = LocalTime.MIN,
@@ -118,18 +118,18 @@ class Instruction(
         @Column(name = "amount", nullable = false) var amount: Position = Position.ZERO
 ) {
     @ManyToOne
-    @JoinColumn(name = "principal_id", nullable = false)
-    lateinit var principal: Account
-    @Column(name = "principal_id", insertable = false, updatable = false)
-    var principalId: Long = 0L
+    @JoinColumn(name = "db_id", nullable = false)
+    lateinit var db: Account
+    @Column(name = "db_id", insertable = false, updatable = false)
+    var dbId: Long = 0L
     @ManyToOne
-    @JoinColumn(name = "counterparty_id", nullable = false)
-    lateinit var counterparty: Account
-    @Column(name = "counterparty_id", insertable = false, updatable = false)
-    var counterpartyId: Long = 0L
+    @JoinColumn(name = "cr_id", nullable = false)
+    lateinit var cr: Account
+    @Column(name = "cr_id", insertable = false, updatable = false)
+    var crId: Long = 0L
 
     val partyIds: List<Long>
-        get() = listOf(principalId, counterpartyId)
+        get() = listOf(dbId, crId)
 
-    override fun toString(): String = "$type ${principal.name} ${counterparty.name} $amount"
+    override fun toString(): String = "$type ${db.name} ${cr.name} $amount"
 }
