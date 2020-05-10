@@ -44,6 +44,10 @@ class KeyManager(val key: SecretKey) {
             .parseClaimsJws(token)
 }
 
+class JwtPreAuthenticatedProcessingFilter : AbstractPreAuthenticatedProcessingFilter() {
+    override fun getPreAuthenticatedPrincipal(request: HttpServletRequest): Any? = request.getHeader("Authorization")
+    override fun getPreAuthenticatedCredentials(request: HttpServletRequest): Any = "N/A"
+}
 
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
@@ -58,10 +62,10 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
                 .addFilter(preAuthTokenHeaderFilter())
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers("/public/**").permitAll()
+                .antMatchers("/dummy/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
                 .antMatchers("$SECURITY_WEB_CONTEXT/**").permitAll()
-                .antMatchers("/app/**").permitAll()
+                .antMatchers("/mustache/**").permitAll()
                 .anyRequest().authenticated()
     }
 
