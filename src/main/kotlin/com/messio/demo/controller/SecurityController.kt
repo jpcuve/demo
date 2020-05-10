@@ -1,12 +1,9 @@
-package com.messio.demo
+package com.messio.demo.controller
 
 import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
-import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
-import io.jsonwebtoken.Claims
-import io.jsonwebtoken.Jws
-import io.jsonwebtoken.Jwts
+import com.messio.demo.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired

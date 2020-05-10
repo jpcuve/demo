@@ -1,5 +1,9 @@
-package com.messio.demo
+package com.messio.demo.controller
 
+import com.messio.demo.CustomException
+import com.messio.demo.Facade
+import com.messio.demo.Instruction
+import com.messio.demo.ProfileValue
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
