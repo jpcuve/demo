@@ -58,9 +58,10 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
                 .addFilter(preAuthTokenHeaderFilter())
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers("/app/**").permitAll()
+                .antMatchers("/public/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
                 .antMatchers("$SECURITY_WEB_CONTEXT/**").permitAll()
+                .antMatchers("/app/**").permitAll()
                 .anyRequest().authenticated()
     }
 
