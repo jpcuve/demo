@@ -11,4 +11,8 @@ class AppProperties {
     lateinit var google: String
     @Value("\${app.secret-key}")
     lateinit var secretKey: String
+    @Value("\${app.mail-from}")
+    lateinit var mailFrom: String
+    @Value("\${app.base-url}")
+    lateinit var baseUrl: String
 }

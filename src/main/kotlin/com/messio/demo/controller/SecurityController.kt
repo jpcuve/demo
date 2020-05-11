@@ -11,12 +11,8 @@ import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.mail.javamail.JavaMailSender
-import org.springframework.mail.javamail.MimeMessageHelper
-import org.springframework.mail.javamail.MimeMessagePreparator
 import org.springframework.security.crypto.password.PasswordEncoder
-import org.springframework.util.ResourceUtils
 import org.springframework.web.bind.annotation.*
-import java.io.InputStreamReader
 import javax.servlet.http.HttpServletRequest
 
 
@@ -25,11 +21,10 @@ import javax.servlet.http.HttpServletRequest
 @CrossOrigin(allowCredentials = "true")
 class SecurityController(
         val facade: Facade,
+        val mailService: MailService,
         val keyManager: KeyManager,
         val passwordEncoder: PasswordEncoder,
-        val appProperties: AppProperties,
-        val compiler: Mustache.Compiler,
-        val javaMailSender: JavaMailSender
+        val appProperties: AppProperties
 ) {
     private val logger: Logger = LoggerFactory.getLogger(SecurityController::class.java)
 
@@ -117,15 +112,15 @@ class SecurityController(
     ): Map<String, String> {
         // either authenticate using request or jwt token
         logger.debug("Update password value: $updatePasswordValue")
-        val username = if (updatePasswordValue.token.isNotEmpty()){
+        val username = if (updatePasswordValue.token.isNotEmpty()) {
             val claims = keyManager.verifyToken(updatePasswordValue.token)
             claims.body.subject
         } else {
             req.userPrincipal.name
         }
         username?.let {
-            facade.userRepository.findTopByEmail(username)?.let {user ->
-                if (updatePasswordValue.newPassword == updatePasswordValue.newPasswordConfirmation){
+            facade.userRepository.findTopByEmail(username)?.let { user ->
+                if (updatePasswordValue.newPassword == updatePasswordValue.newPasswordConfirmation) {
                     user.pass = passwordEncoder.encode(updatePasswordValue.newPassword)
                     facade.userRepository.save(user)
                     return mapOf("status" to "ok")
@@ -139,22 +134,7 @@ class SecurityController(
     fun apiResetPassword(@RequestBody resetPasswordValue: ResetPasswordValue): String {
         facade.userRepository.findTopByEmail(resetPasswordValue.email)?.let {
             val token = keyManager.buildToken(it)  // TODO short expiry
-            // send email with link
-            val file = ResourceUtils.getFile("classpath:email/reset-password.mustache")
-            val source = InputStreamReader(file.inputStream(), Charsets.UTF_8)
-            val template = compiler.compile(source)
-            logger.debug("Template: $template")
-            val resetPasswordUrl = "http://localhost:3000/dummy/update-password?$token"
-            val s = template.execute(mapOf("reset-password-url" to resetPasswordUrl))
-            logger.debug("Output: $s")
-            val messagePreparator = MimeMessagePreparator { mimeMessage ->
-                val helper = MimeMessageHelper(mimeMessage)
-                helper.setFrom("poussy.magnette@gmail.com")
-                helper.setTo(it.email)
-                helper.setSubject("Reset password")
-                helper.setText(s, true)
-            }
-            javaMailSender.send(messagePreparator)
+            mailService.mailUpdatePasswordLink(it.email, token)
         }
         throw CustomException("User not found: ${resetPasswordValue.email}")
     }
