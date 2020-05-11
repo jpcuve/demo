@@ -44,7 +44,7 @@ class SecurityController(
     }
 
     @PostMapping("/sign-in")
-    fun apiSignIn(@RequestBody signInValue: SignInValue, @Autowired req: HttpServletRequest): TokenValue {
+    fun apiSignIn(@RequestBody signInValue: SignInValue): TokenValue {
         facade.userRepository.findTopByEmail(signInValue.email)?.let {
             if (passwordEncoder.matches(signInValue.password, it.pass)) {
                 logger.debug("Login successful for: ${signInValue.email}")
@@ -111,8 +111,28 @@ class SecurityController(
     }
 
     @PostMapping("/update-password")
-    fun apiUpdatePassword(@RequestBody updatePasswordValue: UpdatePasswordValue): String {
-        return "ok"
+    fun apiUpdatePassword(
+            @RequestBody updatePasswordValue: UpdatePasswordValue,
+            @Autowired req: HttpServletRequest
+    ): Map<String, String> {
+        // either authenticate using request or jwt token
+        logger.debug("Update password value: $updatePasswordValue")
+        val username = if (updatePasswordValue.token.isNotEmpty()){
+            val claims = keyManager.verifyToken(updatePasswordValue.token)
+            claims.body.subject
+        } else {
+            req.userPrincipal.name
+        }
+        username?.let {
+            facade.userRepository.findTopByEmail(username)?.let {user ->
+                if (updatePasswordValue.newPassword == updatePasswordValue.newPasswordConfirmation){
+                    user.pass = passwordEncoder.encode(updatePasswordValue.newPassword)
+                    facade.userRepository.save(user)
+                    return mapOf("status" to "ok")
+                }
+            }
+        }
+        throw CustomException("Update password failed")
     }
 
     @PostMapping("/reset-password")
@@ -124,7 +144,8 @@ class SecurityController(
             val source = InputStreamReader(file.inputStream(), Charsets.UTF_8)
             val template = compiler.compile(source)
             logger.debug("Template: $template")
-            val s = template.execute(mapOf("val" to "haha"))
+            val resetPasswordUrl = "http://localhost:3000/dummy/update-password?$token"
+            val s = template.execute(mapOf("reset-password-url" to resetPasswordUrl))
             logger.debug("Output: $s")
             val messagePreparator = MimeMessagePreparator { mimeMessage ->
                 val helper = MimeMessageHelper(mimeMessage)
@@ -136,11 +157,6 @@ class SecurityController(
             javaMailSender.send(messagePreparator)
         }
         throw CustomException("User not found: ${resetPasswordValue.email}")
-    }
-
-    @PostMapping("/google-sign-in")
-    fun apiGoogleSignIn(@RequestBody googleSignInValue: GoogleSignInValue): String {
-        return "ok"
     }
 }
 
