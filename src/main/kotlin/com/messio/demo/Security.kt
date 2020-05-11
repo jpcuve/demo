@@ -21,7 +21,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
 import org.springframework.security.web.authentication.preauth.AbstractPreAuthenticatedProcessingFilter
 import java.nio.charset.StandardCharsets
 import java.security.SecureRandom
-import javax.crypto.SecretKey
 import javax.servlet.Filter
 import javax.servlet.http.HttpServletRequest
 
@@ -30,7 +29,8 @@ const val AUTHORIZATION_PREFIX = "Bearer "
 const val APP_WEB_CONTEXT = "/dummy"
 
 
-class KeyManager(val key: SecretKey) {
+class KeyManager(secretKey: String) {
+    private val key = Keys.hmacShaKeyFor(secretKey.toByteArray(StandardCharsets.UTF_8));
 
     fun buildToken(user: User): String = Jwts
             .builder()
@@ -46,16 +46,10 @@ class KeyManager(val key: SecretKey) {
             .parseClaimsJws(token)
 }
 
-class JwtPreAuthenticatedProcessingFilter : AbstractPreAuthenticatedProcessingFilter() {
-    override fun getPreAuthenticatedPrincipal(request: HttpServletRequest): Any? = request.getHeader("Authorization")
-    override fun getPreAuthenticatedCredentials(request: HttpServletRequest): Any = "N/A"
-}
-
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
-class SecurityConfiguration : WebSecurityConfigurerAdapter() {
+class SecurityConfiguration(val appProperties: AppProperties) : WebSecurityConfigurerAdapter() {
     private val logger = LoggerFactory.getLogger(SecurityConfiguration::class.java)
-    private val key = Keys.hmacShaKeyFor("my_secret_key_must_be_long_enough".toByteArray(StandardCharsets.UTF_8));
 
     override fun configure(http: HttpSecurity) {
         http
@@ -108,7 +102,7 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
     }
 
     @Bean
-    fun keyManager() = KeyManager(key)
+    fun keyManager() = KeyManager(appProperties.secretKey)
 
     @Bean
     fun passwordEncoder() = BCryptPasswordEncoder(10, SecureRandom())

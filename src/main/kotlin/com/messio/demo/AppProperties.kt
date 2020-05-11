@@ -9,5 +9,6 @@ class AppProperties {
     lateinit var defaultBank: String
     @Value("\${app.google}")
     lateinit var google: String
-
+    @Value("\${app.secret-key}")
+    lateinit var secretKey: String
 }

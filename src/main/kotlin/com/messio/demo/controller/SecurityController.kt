@@ -4,14 +4,21 @@ import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
 import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
 import com.google.api.client.json.jackson2.JacksonFactory
 import com.messio.demo.*
+import com.samskivert.mustache.Mustache
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
+import org.springframework.mail.javamail.JavaMailSender
+import org.springframework.mail.javamail.MimeMessageHelper
+import org.springframework.mail.javamail.MimeMessagePreparator
 import org.springframework.security.crypto.password.PasswordEncoder
+import org.springframework.util.ResourceUtils
 import org.springframework.web.bind.annotation.*
+import java.io.InputStreamReader
 import javax.servlet.http.HttpServletRequest
+
 
 @RestController
 @RequestMapping(SECURITY_WEB_CONTEXT)
@@ -20,7 +27,10 @@ class SecurityController(
         val facade: Facade,
         val keyManager: KeyManager,
         val passwordEncoder: PasswordEncoder,
-        val appProperties: AppProperties) {
+        val appProperties: AppProperties,
+        val compiler: Mustache.Compiler,
+        val javaMailSender: JavaMailSender
+) {
     private val logger: Logger = LoggerFactory.getLogger(SecurityController::class.java)
 
     @GetMapping()
@@ -36,7 +46,7 @@ class SecurityController(
     @PostMapping("/sign-in")
     fun apiSignIn(@RequestBody signInValue: SignInValue, @Autowired req: HttpServletRequest): TokenValue {
         facade.userRepository.findTopByEmail(signInValue.email)?.let {
-            if (passwordEncoder.matches(signInValue.password, it.pass)){
+            if (passwordEncoder.matches(signInValue.password, it.pass)) {
                 logger.debug("Login successful for: ${signInValue.email}")
                 val token = keyManager.buildToken(it)
                 logger.debug("Token: $token")
@@ -49,7 +59,7 @@ class SecurityController(
     @PostMapping("/social-sign-in")
     fun apiSocialSignIn(@RequestBody socialSignInValue: SocialSignInValue): TokenValue {
         logger.debug("Social sign-in: $socialSignInValue")
-        when(socialSignInValue.social){
+        when (socialSignInValue.social) {
             "google" -> {
                 val transport = GoogleNetHttpTransport.newTrustedTransport()
                 val jsonFactory = JacksonFactory.getDefaultInstance()
@@ -107,7 +117,25 @@ class SecurityController(
 
     @PostMapping("/reset-password")
     fun apiResetPassword(@RequestBody resetPasswordValue: ResetPasswordValue): String {
-        return "ok"
+        facade.userRepository.findTopByEmail(resetPasswordValue.email)?.let {
+            val token = keyManager.buildToken(it)  // TODO short expiry
+            // send email with link
+            val file = ResourceUtils.getFile("classpath:email/reset-password.mustache")
+            val source = InputStreamReader(file.inputStream(), Charsets.UTF_8)
+            val template = compiler.compile(source)
+            logger.debug("Template: $template")
+            val s = template.execute(mapOf("val" to "haha"))
+            logger.debug("Output: $s")
+            val messagePreparator = MimeMessagePreparator { mimeMessage ->
+                val helper = MimeMessageHelper(mimeMessage)
+                helper.setFrom("poussy.magnette@gmail.com")
+                helper.setTo(it.email)
+                helper.setSubject("Reset password")
+                helper.setText(s, true)
+            }
+            javaMailSender.send(messagePreparator)
+        }
+        throw CustomException("User not found: ${resetPasswordValue.email}")
     }
 
     @PostMapping("/google-sign-in")
