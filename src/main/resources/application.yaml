@@ -1,6 +1,7 @@
 app:
   realm: demo
   default-bank: TEST-01
+  google: 784351879169-fbhd369t9dvnueu1nhm3lom2h6tlu2pu.apps.googleusercontent.com
 spring:
   datasource:
     url: jdbc:h2:mem:demo;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE

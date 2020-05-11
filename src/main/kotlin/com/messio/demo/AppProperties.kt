@@ -7,5 +7,7 @@ import org.springframework.stereotype.Component
 class AppProperties {
     @Value("\${app.default-bank}")
     lateinit var defaultBank: String
+    @Value("\${app.google}")
+    lateinit var google: String
 
 }

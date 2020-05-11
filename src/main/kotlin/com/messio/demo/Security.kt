@@ -27,6 +27,8 @@ import javax.servlet.http.HttpServletRequest
 
 const val SECURITY_WEB_CONTEXT = "/auth"
 const val AUTHORIZATION_PREFIX = "Bearer "
+const val APP_WEB_CONTEXT = "/dummy"
+
 
 class KeyManager(val key: SecretKey) {
 
@@ -62,8 +64,8 @@ class SecurityConfiguration : WebSecurityConfigurerAdapter() {
                 .addFilter(preAuthTokenHeaderFilter())
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
-                .antMatchers("/dummy/**").permitAll()
                 .antMatchers("/h2-console/**").permitAll()
+                .antMatchers("$APP_WEB_CONTEXT/**", "/").permitAll()
                 .antMatchers("$SECURITY_WEB_CONTEXT/**").permitAll()
                 .antMatchers("/mustache/**").permitAll()
                 .anyRequest().authenticated()

@@ -16,7 +16,11 @@ import javax.servlet.http.HttpServletRequest
 @RestController
 @RequestMapping(SECURITY_WEB_CONTEXT)
 @CrossOrigin(allowCredentials = "true")
-class SecurityController(val facade: Facade, val keyManager: KeyManager, val passwordEncoder: PasswordEncoder) {
+class SecurityController(
+        val facade: Facade,
+        val keyManager: KeyManager,
+        val passwordEncoder: PasswordEncoder,
+        val appProperties: AppProperties) {
     private val logger: Logger = LoggerFactory.getLogger(SecurityController::class.java)
 
     @GetMapping()
@@ -50,7 +54,7 @@ class SecurityController(val facade: Facade, val keyManager: KeyManager, val pas
                 val transport = GoogleNetHttpTransport.newTrustedTransport()
                 val jsonFactory = JacksonFactory.getDefaultInstance()
                 val verifier = GoogleIdTokenVerifier.Builder(transport, jsonFactory)
-                        .setAudience(listOf("784351879169-fbhd369t9dvnueu1nhm3lom2h6tlu2pu.apps.googleusercontent.com"))
+                        .setAudience(listOf(appProperties.google))
                         .build()
                 verifier.verify(socialSignInValue.identity)?.let {
                     val payload = it.payload
