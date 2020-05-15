@@ -15,6 +15,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.config.annotation.method.configuration.EnableGlobalMethodSecurity
 import org.springframework.security.config.annotation.web.builders.HttpSecurity
 import org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter
+import org.springframework.security.config.http.SessionCreationPolicy
 import org.springframework.security.core.Authentication
 import org.springframework.security.core.authority.SimpleGrantedAuthority
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder
@@ -55,6 +56,7 @@ class SecurityConfiguration(val appProperties: AppProperties) : WebSecurityConfi
         http
                 .csrf().disable() // not for production
                 .headers().frameOptions().disable().and()  // not for production, necessary for H2 console
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .addFilter(preAuthTokenHeaderFilter())
                 .authorizeRequests()
                 .antMatchers(HttpMethod.OPTIONS, "/**").permitAll()
@@ -68,7 +70,8 @@ class SecurityConfiguration(val appProperties: AppProperties) : WebSecurityConfi
     @Bean
     fun preAuthTokenHeaderFilter(): Filter {
         val filter = object : AbstractPreAuthenticatedProcessingFilter() {
-            override fun getPreAuthenticatedPrincipal(request: HttpServletRequest): Any? = request.getHeader("Authorization")
+            override fun getPreAuthenticatedPrincipal(request: HttpServletRequest): Any?
+                    = request.getHeader("Authorization")
             override fun getPreAuthenticatedCredentials(request: HttpServletRequest): Any = "N/A"
         }
         filter.setAuthenticationManager(authenticationManager())
