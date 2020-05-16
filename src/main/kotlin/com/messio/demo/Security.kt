@@ -54,6 +54,7 @@ class SecurityConfiguration(val appProperties: AppProperties) : WebSecurityConfi
 
     override fun configure(http: HttpSecurity) {
         http
+                .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
                 .csrf().disable() // not for production
                 .headers().frameOptions().disable().and()  // not for production, necessary for H2 console
                 .sessionManagement().sessionCreationPolicy(SessionCreationPolicy.STATELESS).and()
