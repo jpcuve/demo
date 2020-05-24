@@ -43,6 +43,7 @@ class SecurityController(
                     email = firebaseSignInValue.email ?: firebaseSignInValue.uid)
             user.account = facade.accountRepository.findById(1).orElse(null)
         }
+        user.firebaseUid = firebaseSignInValue.uid
         user.displayName = firebaseSignInValue.displayName
         user = facade.userRepository.save(user)
         logger.debug("Login successful for: ${user.email}")
