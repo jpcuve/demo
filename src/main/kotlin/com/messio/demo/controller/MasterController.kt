@@ -21,13 +21,14 @@ class MasterController @Autowired constructor(val facade: Facade) {
 
     @GetMapping("/statement")
     fun apiStatement(@Autowired req: HttpServletRequest): List<Instruction> {
-        facade.userRepository.findTopByEmail(req.userPrincipal.name)?.let {
+        val userPrincipalName = req.userPrincipal.name
+        facade.userRepository.findTopByEmail(userPrincipalName)?.let {
             return facade.instructionRepository.findByBank(it.account.bank)
                     .filter { i -> i.booked != null && (i.partyIds.contains(it.account.id)) }
                     .sortedBy { i -> i.bookId ?: 0L }
                     .toList()
         }
-        throw CustomException("User not found")
+        throw CustomException("User not found: ${userPrincipalName}")
     }
 
     @GetMapping("/perpetual")
@@ -36,7 +37,7 @@ class MasterController @Autowired constructor(val facade: Facade) {
             val currencyGroups = facade.currencyGroupRepository.findAll()
             val currencies = facade.currencyRepository.findByBank(it.account.bank)
             return mapOf(
-                    "profile" to ProfileValue(true, "", it.name, it.securityRoles),
+                    "profile" to ProfileValue(true, "", it.displayName, it.securityRoles),
                     "account" to it.account,
                     "bank" to it.account.bank,
                     "currencyGroups" to currencyGroups,

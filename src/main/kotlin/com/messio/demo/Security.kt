@@ -90,6 +90,7 @@ class SecurityConfiguration(val appProperties: AppProperties) : WebSecurityConfi
                     logger.debug("Claims: $claims")
                     val grantedAuthorities = claims.body["roles"].toString()
                             .split(",")
+                            .filter { it.isNotEmpty() }
                             .map { SimpleGrantedAuthority(it) }
                             .toList()
                     return UsernamePasswordAuthenticationToken(

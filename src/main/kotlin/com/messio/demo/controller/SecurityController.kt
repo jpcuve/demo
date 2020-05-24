@@ -1,17 +1,12 @@
 package com.messio.demo.controller
 
-import com.google.api.client.googleapis.auth.oauth2.GoogleIdTokenVerifier
-import com.google.api.client.googleapis.javanet.GoogleNetHttpTransport
-import com.google.api.client.json.jackson2.JacksonFactory
 import com.messio.demo.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
-import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.security.crypto.password.PasswordEncoder
 import org.springframework.web.bind.annotation.*
-import javax.servlet.http.HttpServletRequest
 
 
 @RestController
@@ -19,10 +14,7 @@ import javax.servlet.http.HttpServletRequest
 @CrossOrigin(allowCredentials = "true")
 class SecurityController(
         val facade: Facade,
-        val mailService: MailService,
-        val keyManager: KeyManager,
-        val passwordEncoder: PasswordEncoder,
-        val appProperties: AppProperties
+        val keyManager: KeyManager
 ) {
     private val logger: Logger = LoggerFactory.getLogger(SecurityController::class.java)
 
@@ -36,6 +28,7 @@ class SecurityController(
         return ResponseEntity(HttpStatus.BAD_REQUEST)
     }
 
+/*
     @PostMapping("/sign-in")
     fun apiSignIn(@RequestBody signInValue: SignInValue): TokenValue {
         facade.userRepository.findTopByEmail(signInValue.email)?.let {
@@ -48,7 +41,27 @@ class SecurityController(
         }
         throw CustomException("Invalid email / password")
     }
+*/
 
+    @PostMapping("/firebase-sign-in")
+    fun apiFirebaseSignIn(@RequestBody firebaseSignInValue: FirebaseSignInValue): TokenValue {
+        facade
+                .userRepository
+                .findTopByEmail(if (firebaseSignInValue.isAnonymous || firebaseSignInValue.email == null) {
+                    "anonymous@demo"
+                } else {
+                    firebaseSignInValue.email
+                })
+                ?.let {
+                    logger.debug("Login successful for: ${it.email}")
+                    val token = keyManager.buildToken(it)
+                    logger.debug("Token: $token")
+                    return TokenValue(token)
+                }
+        throw CustomException("Invalid sign-in")
+    }
+
+/*
     @PostMapping("/social-sign-in")
     fun apiSocialSignIn(@RequestBody socialSignInValue: SocialSignInValue): TokenValue {
         logger.debug("Social sign-in: $socialSignInValue")
@@ -74,12 +87,14 @@ class SecurityController(
         }
         throw CustomException("Invalid token")
     }
+*/
 
     @GetMapping("/sign-out")
     fun apiSignOut(): TokenValue {
         return TokenValue()
     }
 
+/*
     @PostMapping("/sign-up")
     fun apiSignUp(@RequestBody signUpValue: SignUpValue): Map<String, String> {
         facade.userRepository.findTopByEmail(signUpValue.email)?.let {
@@ -136,5 +151,6 @@ class SecurityController(
         }
         throw CustomException("User not found: ${resetPasswordValue.email}")
     }
+*/
 }
 

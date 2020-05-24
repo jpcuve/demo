@@ -42,7 +42,6 @@ interface AccountRepository : CrudRepository<Account, Long> {
 @Repository
 interface UserRepository : CrudRepository<User, Long> {
     fun findTopByEmail(email: String): User?
-    fun findTopByGoogleId(googleId: String): User?
 }
 
 @Repository
