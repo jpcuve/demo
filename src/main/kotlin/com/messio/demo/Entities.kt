@@ -34,9 +34,10 @@ class Account(
 @JsonIgnoreProperties("account")
 class User(
         @Id @GeneratedValue(strategy = GenerationType.IDENTITY) @Column(name = "id") var id: Long = 0L,
+        @Column(name = "firebase_uid", unique = true) var firebaseUid: String?,
         @Column(name = "anonymous", nullable = false) var anonymous: Boolean = false,
-        @Column(name = "email", nullable = false, unique = true) var email: String = "",
-        @Column(name = "display_name", nullable = false) var displayName: String = "",
+        @Column(name = "email", unique = true, nullable = false) var email: String,
+        @Column(name = "display_name") var displayName: String? = null,
         @Column(name = "roles", nullable = false) var roles: String = ""
 ) {
     @ManyToOne

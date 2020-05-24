@@ -17,9 +17,8 @@ insert into accounts(id, bank_id, name, short_position_limit) values
 (3, 2, 'a', '{}'),
 (4, 2, 'b', '{}'),
 (5, 2, 'c', '{}');
-insert into users(id, account_id, anonymous, email, display_name, roles) values
-(1, 1, true, 'anonymous@demo', '?anonymous?', ''),
-(2, 2, false, 'jpcuvelliez@gmail.com', 'Jean-Pierre Cuvelliez', 'DEVELOPER');
+insert into users(id, account_id, firebase_uid, anonymous, email, display_name, roles) values
+(2, 2, null, false, 'jpcuvelliez@gmail.com', 'Jean-Pierre Cuvelliez', 'DEVELOPER');
 insert into instructions(id, db_id, cr_id, moment, instruction_type, reference, amount) values
 (1, 3, 4, '08:00', 'PAY', 'TEST', '{}'),
 (2, 4, 3, '09:30', 'SETTLEMENT', 'Settlement 1', '{EUR=70,USD=90}'),

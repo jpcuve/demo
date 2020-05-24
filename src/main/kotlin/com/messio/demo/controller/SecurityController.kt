@@ -29,17 +29,26 @@ class SecurityController(
 
     @PostMapping("/firebase-sign-in")
     fun apiFirebaseSignIn(@RequestBody firebaseSignInValue: FirebaseSignInValue): TokenValue {
-        if (firebaseSignInValue.isAnonymous || firebaseSignInValue.email == null) {
-            facade.userRepository.findTopByAnonymous(true)
-        } else {
-            facade.userRepository.findTopByEmail(firebaseSignInValue.email)
-        }?.let {
-            logger.debug("Login successful for: ${it.email}")
-            val token = keyManager.buildToken(it)
-            logger.debug("Token: $token")
-            return TokenValue(token)
+        facade.userRepository.findTopByFirebaseUid(firebaseSignInValue.uid)?.let {
+            return TokenValue(keyManager.buildToken(it))
         }
-        throw CustomException("Invalid sign-in")
+        var user: User? = null
+        if (!firebaseSignInValue.isAnonymous && firebaseSignInValue.email != null) {
+            user = facade.userRepository.findTopByEmail(firebaseSignInValue.email)
+        }
+        if (user == null){
+            user = User(
+                    firebaseUid = firebaseSignInValue.uid,
+                    anonymous = firebaseSignInValue.isAnonymous,
+                    email = firebaseSignInValue.email ?: firebaseSignInValue.uid)
+            user.account = facade.accountRepository.findById(1).orElse(null)
+        }
+        user.displayName = firebaseSignInValue.displayName
+        user = facade.userRepository.save(user)
+        logger.debug("Login successful for: ${user.email}")
+        val token = keyManager.buildToken(user)
+        logger.debug("Token: $token")
+        return TokenValue(token)
     }
 
     @GetMapping("/sign-out")

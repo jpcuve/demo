@@ -37,7 +37,7 @@ class MasterController @Autowired constructor(val facade: Facade) {
             val currencyGroups = facade.currencyGroupRepository.findAll()
             val currencies = facade.currencyRepository.findByBank(it.account.bank)
             return mapOf(
-                    "profile" to ProfileValue(true, "", it.displayName, it.securityRoles),
+                    "profile" to ProfileValue(true, "", it.displayName ?: "", it.securityRoles),
                     "account" to it.account,
                     "bank" to it.account.bank,
                     "currencyGroups" to currencyGroups,

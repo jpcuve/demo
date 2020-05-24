@@ -42,7 +42,7 @@ interface AccountRepository : CrudRepository<Account, Long> {
 @Repository
 interface UserRepository : CrudRepository<User, Long> {
     fun findTopByEmail(email: String): User?
-    fun findTopByAnonymous(anonymous: Boolean): User?
+    fun findTopByFirebaseUid(uid: String): User?
 }
 
 @Repository
