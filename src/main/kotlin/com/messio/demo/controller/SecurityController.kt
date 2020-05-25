@@ -3,9 +3,11 @@ package com.messio.demo.controller
 import com.messio.demo.*
 import org.slf4j.Logger
 import org.slf4j.LoggerFactory
+import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.http.HttpStatus
 import org.springframework.http.ResponseEntity
 import org.springframework.web.bind.annotation.*
+import javax.servlet.http.HttpServletRequest
 
 
 @RestController
@@ -55,6 +57,16 @@ class SecurityController(
     @GetMapping("/sign-out")
     fun apiSignOut(): TokenValue {
         return TokenValue()
+    }
+
+    @PostMapping("/update-messaging-token")
+    fun apiUpdateMessagingToken(@RequestBody messagingTokenValue: TokenValue, @Autowired req: HttpServletRequest): TokenValue {
+        facade.userRepository.findTopByEmail(req.userPrincipal.name)?.let {
+            it.messagingToken = messagingTokenValue.token
+            facade.userRepository.save(it)
+            return messagingTokenValue
+        }
+        throw CustomException("User not found")
     }
 }
 

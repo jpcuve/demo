@@ -38,7 +38,8 @@ class User(
         @Column(name = "anonymous", nullable = false) var anonymous: Boolean = false,
         @Column(name = "email", unique = true, nullable = false) var email: String,
         @Column(name = "display_name") var displayName: String? = null,
-        @Column(name = "roles", nullable = false) var roles: String = ""
+        @Column(name = "roles", nullable = false) var roles: String = "",
+        @Column(name = "messaging_token") var messagingToken: String? = null
 ) {
     @ManyToOne
     @JoinColumn(name = "account_id", nullable = false)
