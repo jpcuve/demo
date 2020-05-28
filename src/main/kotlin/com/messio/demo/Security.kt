@@ -47,6 +47,15 @@ class KeyManager(secretKey: String) {
             .parseClaimsJws(token)
 }
 
+class PreAuthTokenHeaderFilter(val authenticationManager: AuthenticationManager): AbstractPreAuthenticatedProcessingFilter(){
+    init {
+        setAuthenticationManager(authenticationManager)
+    }
+    override fun getPreAuthenticatedPrincipal(request: HttpServletRequest): Any?
+            = request.getHeader("Authorization")
+    override fun getPreAuthenticatedCredentials(request: HttpServletRequest): Any = "N/A"
+}
+
 @Configuration
 @EnableGlobalMethodSecurity(prePostEnabled = true, securedEnabled = true, jsr250Enabled = true)
 class SecurityConfiguration(val appProperties: AppProperties) : WebSecurityConfigurerAdapter() {
@@ -69,15 +78,7 @@ class SecurityConfiguration(val appProperties: AppProperties) : WebSecurityConfi
     }
 
     @Bean
-    fun preAuthTokenHeaderFilter(): Filter {
-        val filter = object : AbstractPreAuthenticatedProcessingFilter() {
-            override fun getPreAuthenticatedPrincipal(request: HttpServletRequest): Any?
-                    = request.getHeader("Authorization")
-            override fun getPreAuthenticatedCredentials(request: HttpServletRequest): Any = "N/A"
-        }
-        filter.setAuthenticationManager(authenticationManager())
-        return filter
-    }
+    fun preAuthTokenHeaderFilter(): Filter = PreAuthTokenHeaderFilter(authenticationManager())
 
     @Bean
     override fun authenticationManager() = object : AuthenticationManager {
