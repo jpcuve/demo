@@ -88,7 +88,7 @@ class SecurityConfiguration(val appProperties: AppProperties) : WebSecurityConfi
                 val token = authorizationHeader.substring(AUTHORIZATION_PREFIX.length).trim()
                 try {
                     val claims = keyManager().verifyToken(token)
-                    logger.debug("Claims: $claims")
+                    // logger.debug("Claims: $claims")
                     val grantedAuthorities = claims.body["roles"].toString()
                             .split(",")
                             .filter { it.isNotEmpty() }
