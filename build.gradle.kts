@@ -28,6 +28,7 @@ dependencies {
 	runtimeOnly("io.jsonwebtoken:jjwt-jackson:0.11.1")
 	runtimeOnly("com.h2database:h2")
 	implementation("com.google.api-client:google-api-client:1.30.9")
+	implementation("com.google.firebase:firebase-admin:6.13.0")
 	implementation("org.jetbrains.kotlin:kotlin-reflect")
 	implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8")
 	testImplementation("org.springframework.boot:spring-boot-starter-test") {

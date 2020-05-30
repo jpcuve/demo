@@ -1,5 +1,6 @@
-package com.messio.demo
+package com.messio.demo.service
 
+import com.messio.demo.BaseEvent
 import org.slf4j.LoggerFactory
 import org.springframework.beans.factory.annotation.Autowired
 import org.springframework.context.ApplicationEventPublisher

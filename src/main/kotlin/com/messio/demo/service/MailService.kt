@@ -1,5 +1,7 @@
-package com.messio.demo
+package com.messio.demo.service
 
+import com.messio.demo.APP_WEB_CONTEXT
+import com.messio.demo.AppProperties
 import com.samskivert.mustache.Mustache
 import org.slf4j.LoggerFactory
 import org.springframework.mail.javamail.JavaMailSender
@@ -24,7 +26,7 @@ class MailService(
         val source = InputStreamReader(file.inputStream(), Charsets.UTF_8)
         val template = compiler.compile(source)
         logger.debug("Template: $template")
-        val resetPasswordUrl = "${appProperties.baseUrl}${APP_WEB_CONTEXT}/update-password?$token"
+        val resetPasswordUrl = "${appProperties.baseUrl}$APP_WEB_CONTEXT/update-password?$token"
         val s = template.execute(mapOf("reset-password-url" to resetPasswordUrl))
         logger.debug("Output: $s")
         val messagePreparator = MimeMessagePreparator { mimeMessage ->

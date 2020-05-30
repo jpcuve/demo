@@ -55,7 +55,12 @@ class SecurityController(
     }
 
     @GetMapping("/sign-out")
-    fun apiSignOut(): TokenValue {
+    fun apiSignOut(@Autowired req: HttpServletRequest): TokenValue {
+        facade.userRepository.findTopByEmail(req.userPrincipal.name)?.let {
+            it.messagingToken = null
+            facade.userRepository.save(it)
+        }
+        // erase messagingToken so it cannot be used while logged out
         return TokenValue()
     }
 
